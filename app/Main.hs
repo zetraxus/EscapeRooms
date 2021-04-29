@@ -3,7 +3,16 @@ module Main where
 import Lib
 import System.IO (hFlush, stdout)
 import Data.Text as T
---
+import Data.IORef
+
+type Counter = Int -> IO Int
+
+makeCounter :: IO Counter
+makeCounter = do
+   r <- newIORef 0
+   return (\i -> do modifyIORef r (+i)
+                    readIORef r)
+
 getCommand :: String -> IO String
 getCommand prompt = do
     putStrLn prompt
@@ -29,6 +38,9 @@ enterCode :: IO()
 enterCode = putStrLn "enterCode"
 
 main = do {
+    room_id <- makeCounter;
+--    a <- room_id 3;
+--    print [a];
     command <- getCommand "Co robisz?";
     if command == "rozgladam sie"
       then lookAround
@@ -48,5 +60,5 @@ main = do {
 --    print $ T.splitOn (T.pack " ") (T.pack command) !! 0;
 --    checkCommand $ T.splitOn (T.pack " ") (T.pack command) !! 0;
 --    T.splitOn (T.pack " ") (T.pack command) !! 0;
-    --    T.unpack $ T.splitOn (T.pack " ") (T.pack command);
+--    T.unpack $ T.splitOn (T.pack " ") (T.pack command);
 }

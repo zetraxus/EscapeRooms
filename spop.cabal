@@ -1,0 +1,63 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 2842afadbc7c1e4b0759cca8eb851045e0b1bf445b29b15e127056773b08a8df
+
+name:           spop
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/Github username here/spop#readme>
+homepage:       https://github.com/Github username here/spop#readme
+bug-reports:    https://github.com/Github username here/spop/issues
+author:         Author name here
+maintainer:     Author email here
+copyright:      2019 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/Github username here/spop
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_spop
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , text >=1.2.4.1
+  default-language: Haskell2010
+
+executable spop-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_spop
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , spop
+  default-language: Haskell2010
+
+test-suite spop-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_spop
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , spop
+  default-language: Haskell2010

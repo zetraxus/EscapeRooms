@@ -78,12 +78,23 @@ readNote = putStrLn "readNote"
 use :: GameState -> String -> String -> IO()
 use gameState item roomObject = do
   let roomId = first(gameState)
+      inventoryState = second(gameState)
       roomsState = third(gameState)
       currentRoomState = roomsState !! roomId
+  
+  if roomId == 0 && item == "klucz" && roomObject == "drzwi" then do
+    let newInventoryState = removeFromList item inventoryState
+        newGameState = (roomId + 1, newInventoryState, roomsState)
+    game newGameState
+--  else if roomId == 0 && item == "xd" && roomObject == "xd2" then do
+--    game gameState
+  else do
+    putStrLn "Nie mozna uzyc przedmiotu z tym obiektem"
+    game gameState
   --czy mam item w inv
   --czy roomObj jest w pokoju
   -- (id, item, roomObj, )
-  putStrLn "use"
+
 
 showEq :: IO()
 showEq = putStrLn "showEq"
@@ -124,10 +135,10 @@ gameOver gameState = first(gameState) == 1
 game :: GameState -> IO()
 game gameState = do
     if gameOver gameState then putStrLn "Koniec gry!"
-      else do
-        line <- getInputLine "Co robisz?";
-        let tokenizedLine = tokenize line
-        command tokenizedLine gameState
+    else do
+      line <- getInputLine "Co robisz?";
+      let tokenizedLine = tokenize line
+      command tokenizedLine gameState
 
 main :: IO ()
 main = game initialGameState

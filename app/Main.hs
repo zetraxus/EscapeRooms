@@ -1,6 +1,5 @@
 module Main where
 
-import Lib
 import System.IO (hFlush, stdout)
 import Prelude
 
@@ -16,7 +15,7 @@ third :: (a, b, c) -> c
 third (_, _, c) = c
 
 removeFromList :: Eq a => a -> [a] -> [a]
-removeFromList x [] = []
+removeFromList _ [] = []
 removeFromList x (y:ys) | x == y = ys
                         | otherwise = y : removeFromList x ys
 
@@ -72,7 +71,7 @@ help = putStrLn "help"
 
 command :: [String] -> GameState -> IO ()
 command line gameState = do
-  let cmd = line !! 0
+  let cmd = head line
   case cmd of
     "rozgladam" -> lookAround gameState
     "podnosze" -> pickUp gameState (line !! 1)
@@ -87,7 +86,7 @@ initialGameState :: GameState
 initialGameState = (0, [], [["klucz", "drzwi", "xd", "xd2"], ["klucz1", "drzwi1", "xd4", "xd3"]])
 
 gameOver :: GameState -> Bool
-gameOver gameState = first(gameState) == 1
+gameOver gameState = first gameState == 1
 
 game :: GameState -> IO()
 game gameState = do
@@ -98,4 +97,5 @@ game gameState = do
         command tokenizedLine initialGameState
 
 
+main :: IO ()
 main = game initialGameState

@@ -25,7 +25,7 @@ replaceNth n newVal (x:xs) | n == 0 = newVal:xs
                            | otherwise = x:replaceNth (n-1) newVal xs
                            
 isOnList :: Eq a => a -> [a] -> Bool
-isOnList x [] = False 
+isOnList _ [] = False 
 isOnList x (y:ys) | x == y = True
                   | otherwise = isOnList x ys
 
@@ -39,31 +39,7 @@ tokenize :: String -> [String]
 tokenize command = do
   let splittedCommand = words command
   splittedCommand
-
-lookAround :: GameState -> IO()
-lookAround gameState = do
-  putStrLn "lookAround"
-  game gameState
-
-pickUp :: GameState -> String -> IO()
-pickUp gameState object = do
-  putStrLn "pickUp"
-
-  let roomId = first(gameState)
-      roomsState = third(gameState)
-      currentRoomState = roomsState !! roomId
-
-  if isOnList object currentRoomState then do --check if on the list
-    let newCurrentRoomState = removeFromList object currentRoomState --remove object currentRoom
-        newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
-        newGameState = (roomId, second(gameState) ++ [object], newRoomsState) --update gameState
-    printGameState newGameState
-    game newGameState
-    else do
-      print "Przedmiotu nie ma w pokoju"
-      printGameState gameState
-      game gameState
-
+  
 printGameState :: GameState -> IO()
 printGameState gameState = do
   let roomId = first(gameState)
@@ -74,11 +50,40 @@ printGameState gameState = do
   print roomState
   putStrLn "=============="
 
+lookAround :: GameState -> IO()
+lookAround gameState = do
+  printGameState gameState
+  game gameState
+
+pickUp :: GameState -> String -> IO()
+pickUp gameState item = do
+  let roomId = first(gameState)
+      roomsState = third(gameState)
+      currentRoomState = roomsState !! roomId
+
+  if isOnList item currentRoomState then do --check if on the list
+    let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
+        newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
+        newGameState = (roomId, second(gameState) ++ [item], newRoomsState) --update gameState
+    printGameState newGameState
+    game newGameState
+  else do
+    print "Przedmiotu nie ma w pokoju"
+    printGameState gameState
+    game gameState
+
 readNote :: IO()
 readNote = putStrLn "readNote"
 
-use :: IO()
-use = putStrLn "use"
+use :: GameState -> String -> String -> IO()
+use gameState item roomObject = do
+  let roomId = first(gameState)
+      roomsState = third(gameState)
+      currentRoomState = roomsState !! roomId
+  --czy mam item w inv
+  --czy roomObj jest w pokoju
+  -- (id, item, roomObj, )
+  putStrLn "use"
 
 showEq :: IO()
 showEq = putStrLn "showEq"
@@ -86,21 +91,29 @@ showEq = putStrLn "showEq"
 enterCode :: IO()
 enterCode = putStrLn "enterCode"
 
-help :: IO()
-help = putStrLn "help"
+help :: GameState -> IO()
+help gameState = do
+  putStrLn "=============="
+  putStrLn "Dostepne komendy:"
+  putStrLn "rozejrzyj sie, podnies, czytaj, uzyj, przegladaj, wpisz kod"
+  putStrLn "=============="
+  game gameState
 
 command :: [String] -> GameState -> IO ()
 command line gameState = do
   let cmd = head line
+  --TODO error check if line !! 3 exist
   case cmd of
-    "rozejzyj" -> lookAround gameState
+    "rozejrzyj" -> lookAround gameState
     "podnies" -> pickUp gameState (line !! 1)
     "czytaj" -> readNote
-    "uzyj" -> use
+    "uzyj" -> use gameState (line !! 1) (line !! 2)
     "przegladaj" -> showEq
     "wpisz" -> enterCode
-    "ratunku!" -> help
-    _ -> putStrLn "Bledna komenda"
+    "pomocy" -> help gameState
+    _ -> do putStrLn "Bledna komenda!"
+            help gameState 
+    
 
 initialGameState :: GameState
 initialGameState = (0, [], [["klucz", "drzwi", "xd", "xd2"], ["klucz1", "drzwi1", "xd4", "xd3"]])

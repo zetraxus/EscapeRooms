@@ -7,10 +7,10 @@ type GameState = (Int, [String], [[String]]) -- (nr pokoju, inventory, [p1, p2, 
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (0, [], [["klucz", "drzwi", "xd", "xd2"], ["klucz1", "drzwi1", "xd4", "xd3"]])
+initialGameState = (1, [], [["klucz"], ["notatka", "list"]]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
-worldDescription = ["Jestes w pierwszym pokoju.", "Jestes w 2 pokoju."]
+worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.", "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."]
 
 first :: (a, b, c) -> a
 first (a, _, _) = a
@@ -59,10 +59,10 @@ printGameState gameState = do
 
 lookAround :: GameState -> IO()
 lookAround gameState = do
-  printGameState gameState
+  --printGameState gameState
   let roomId = first(gameState)
       description = worldDescription
-  print (description !! roomId)
+  putStrLn (description !! roomId)
   game gameState
 
 pickUp :: GameState -> String -> IO()
@@ -80,8 +80,23 @@ pickUp gameState item = do
     print "Przedmiotu nie ma w pokoju"
     game gameState
 
-readNote :: IO()
-readNote = putStrLn "readNote"
+readNote :: GameState -> String -> IO()
+readNote gameState item = do
+  let inventoryState = second(gameState)
+  if isOnList item inventoryState then do
+    if item == "list" then do
+      putStrLn "Witaj podrozniku!\nJesli czytasz ten list prawdopodobnie jestes w takiej samej sytuacji jak ja teraz. Notatka jest zdradliwa, aby otworzyc drzwi musisz podac prawidlowy kod, jednak notatka nie precyzuje dokladnie jaki jest kod. Niestety po 3 probie wpisanie kodu mechanizm zablokowal sie, a na wyswietlaczu pojawil sie licznik. Po kilku dniach zorientowalem sie, ze licznik pokazuje liczbe dni do jakiegos wydarzenia. (Byc moze do oblokowania mechanizmu) Zostaly mi jeszcze 83 dni. Jesli to czytasz chcialbym Cie poinformowac, ze poczatkowe liczby pierwsze, ktore wyznaczylem do obliczenia kodu to 11, 13 i 29. Niestety zadna z nich nie jest prawidlowa.\nSprawdz inne liczby. Moze Ci sie uda.\nPowodzenia!"
+      game gameState
+    else if item == "notatka" then do
+      putStrLn "Wez liczbe pierwsza pomiedzy 10, a 30, podnies ja do kwadratu, a nastepnie pomnoz przez liczbe pelnych tygodni w kazdym roku."
+      game gameState
+    else do
+      putStrLn "Nie mozesz przeczytac tego przedmiotu"
+      game gameState
+  else do
+    putStrLn "Nie posiadasz przedmiotu o takiej nazwie"
+    game gameState
+  
 
 use :: GameState -> String -> String -> IO()
 use gameState item roomObject = do
@@ -93,7 +108,7 @@ use gameState item roomObject = do
     if roomId == 0 && item == "klucz" && roomObject == "drzwi" then do
       let newInventoryState = removeFromList item inventoryState
           newGameState = (roomId + 1, newInventoryState, roomsState)
-      game newGameState
+      lookAround newGameState
 --    else if roomId == 0 && item == "xd" && roomObject == "xd2" then do
 --      game gameState
     else do
@@ -111,6 +126,7 @@ showEq gameState = do
 
 enterCode :: IO()
 enterCode = putStrLn "enterCode"
+--Good code for level 2: 27508, po 3 probach skoncz gre z informacja o przegranej
 
 help :: GameState -> IO()
 help gameState = do
@@ -127,7 +143,7 @@ command line gameState = do
   case cmd of
     "rozejrzyj" -> lookAround gameState
     "podnies" -> pickUp gameState (line !! 1)
-    "czytaj" -> readNote
+    "przeczytaj" -> readNote gameState (line !! 1)
     "uzyj" -> use gameState (line !! 1) (line !! 2)
     "przegladaj" -> showEq gameState
     "wpisz" -> enterCode
@@ -147,4 +163,4 @@ game gameState = do
       command tokenizedLine gameState
 
 main :: IO ()
-main = game initialGameState
+main = lookAround initialGameState

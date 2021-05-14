@@ -4,6 +4,13 @@ import System.IO (hFlush, stdout)
 import Prelude
 
 type GameState = (Int, [String], [[String]]) -- (nr pokoju, inventory, [p1, p2, p3...])
+type WorldDescription = [String]
+
+initialGameState :: GameState
+initialGameState = (0, [], [["klucz", "drzwi", "xd", "xd2"], ["klucz1", "drzwi1", "xd4", "xd3"]])
+
+worldDescription :: WorldDescription
+worldDescription = ["Jestes w pierwszym pokoju.", "Jestes w 2 pokoju."]
 
 first :: (a, b, c) -> a
 first (a, _, _) = a
@@ -53,6 +60,9 @@ printGameState gameState = do
 lookAround :: GameState -> IO()
 lookAround gameState = do
   printGameState gameState
+  let roomId = first(gameState)
+      description = worldDescription
+  print (description !! roomId)
   game gameState
 
 pickUp :: GameState -> String -> IO()
@@ -65,11 +75,9 @@ pickUp gameState item = do
     let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
         newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
         newGameState = (roomId, second(gameState) ++ [item], newRoomsState) --update gameState
-    printGameState newGameState
     game newGameState
   else do
     print "Przedmiotu nie ma w pokoju"
-    printGameState gameState
     game gameState
 
 readNote :: IO()
@@ -81,23 +89,25 @@ use gameState item roomObject = do
       inventoryState = second(gameState)
       roomsState = third(gameState)
       currentRoomState = roomsState !! roomId
-  
-  if roomId == 0 && item == "klucz" && roomObject == "drzwi" then do
-    let newInventoryState = removeFromList item inventoryState
-        newGameState = (roomId + 1, newInventoryState, roomsState)
-    game newGameState
---  else if roomId == 0 && item == "xd" && roomObject == "xd2" then do
---    game gameState
+  if isOnList item inventoryState then do
+    if roomId == 0 && item == "klucz" && roomObject == "drzwi" then do
+      let newInventoryState = removeFromList item inventoryState
+          newGameState = (roomId + 1, newInventoryState, roomsState)
+      game newGameState
+--    else if roomId == 0 && item == "xd" && roomObject == "xd2" then do
+--      game gameState
+    else do
+      putStrLn "Nie mozna uzyc przedmiotu z tym obiektem"
+      game gameState
   else do
-    putStrLn "Nie mozna uzyc przedmiotu z tym obiektem"
+    putStrLn "Nie posiadasz przedmiotu o takiej nazwie"
     game gameState
-  --czy mam item w inv
-  --czy roomObj jest w pokoju
-  -- (id, item, roomObj, )
 
-
-showEq :: IO()
-showEq = putStrLn "showEq"
+showEq :: GameState -> IO()
+showEq gameState = do
+  let inventoryState = second(gameState)
+  print inventoryState
+  game gameState
 
 enterCode :: IO()
 enterCode = putStrLn "enterCode"
@@ -106,7 +116,7 @@ help :: GameState -> IO()
 help gameState = do
   putStrLn "=============="
   putStrLn "Dostepne komendy:"
-  putStrLn "rozejrzyj sie, podnies, czytaj, uzyj, przegladaj, wpisz kod"
+  putStrLn "rozejrzyj sie, podnies, czytaj, uzyj, przegladaj ekwipunek, wpisz kod"
   putStrLn "=============="
   game gameState
 
@@ -119,18 +129,14 @@ command line gameState = do
     "podnies" -> pickUp gameState (line !! 1)
     "czytaj" -> readNote
     "uzyj" -> use gameState (line !! 1) (line !! 2)
-    "przegladaj" -> showEq
+    "przegladaj" -> showEq gameState
     "wpisz" -> enterCode
     "pomocy" -> help gameState
     _ -> do putStrLn "Bledna komenda!"
             help gameState 
-    
-
-initialGameState :: GameState
-initialGameState = (0, [], [["klucz", "drzwi", "xd", "xd2"], ["klucz1", "drzwi1", "xd4", "xd3"]])
 
 gameOver :: GameState -> Bool
-gameOver gameState = first(gameState) == 1
+gameOver gameState = first(gameState) == 2
 
 game :: GameState -> IO()
 game gameState = do

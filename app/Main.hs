@@ -4,7 +4,7 @@ import Lib
 import System.IO (hFlush, stdout)
 import Prelude
 
-type GameState = [Int]
+type GameState = (Int, [[String]])
 
 getInputLine :: String -> IO String
 getInputLine prompt = do
@@ -25,7 +25,7 @@ lookAround gameState = do
 pickUp :: GameState -> IO()
 pickUp gameState = do
   putStrLn "pickUp"
-  game [0,0,0]
+  game (1, [["pusto", "pusto2"], ["po1", "po1a"]])--move to enter new room
 
 readNote :: IO()
 readNote = putStrLn "readNote"
@@ -56,10 +56,10 @@ command line gameState = do
     _ -> putStrLn "Bledna komenda"
 
 initialGameState :: GameState
-initialGameState = [1, 1, 1]
+initialGameState = (0, [["pusto", "pusto2"], ["po1", "po1a"]])
 
 gameOver :: GameState -> Bool
-gameOver gameState = gameState == [0, 0, 0]
+gameOver gameState = fst(gameState) == 1
 
 game :: GameState -> IO()
 game gameState = do

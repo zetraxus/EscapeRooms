@@ -1,10 +1,28 @@
 module Main where
 
-import Lib
 import System.IO (hFlush, stdout)
 import Prelude
 
-type GameState = [Int]
+type GameState = (Int, [String], [[String]]) -- (nr pokoju, inventory, [p1, p2, p3...])
+
+first :: (a, b, c) -> a
+first (a, _, _) = a
+
+second :: (a, b, c) -> b
+second (_, b, _) = b
+
+third :: (a, b, c) -> c
+third (_, _, c) = c
+
+removeFromList :: Eq a => a -> [a] -> [a]
+removeFromList _ [] = []
+removeFromList x (y:ys) | x == y = ys
+                        | otherwise = y : removeFromList x ys
+
+--replaceNth :: Int -> a -> [a] -> [a]
+--replaceNth _ _ [] = []
+--replaceNth n newVal (x:xs) | n == 0 = newVal:xs
+--                           | otherwise = x:replaceNth (n-1) newVal xs
 
 getInputLine :: String -> IO String
 getInputLine prompt = do
@@ -22,10 +40,19 @@ lookAround gameState = do
   putStrLn "lookAround"
   game gameState
 
-pickUp :: GameState -> IO()
-pickUp gameState = do
+pickUp :: GameState -> String -> IO()
+pickUp gameState object = do
   putStrLn "pickUp"
-  game [0,0,0]
+  --TODO add check if object exists
+  let currentRoom = third(gameState) !! first(gameState) --get current room state
+  let newCurrentRoom = removeFromList object currentRoom --remove object currentRoom
+  print newCurrentRoom --print list
+
+--  let (ys,zs) = splitAt n xs in ys ++ (tail zs)
+  --ys ++ zs
+--  let xd = let (ys,zs) = splitAt first(gameState) third(gameState) in ys ++ ([newCurrentRoom] ++ tail zs)
+  game (first(gameState), second(gameState) ++ [object], third(gameState))--replaceNth(first(gameState), newCurrentRoom, third(gameState)))--removeFromList(object, currentRoom))
+--  game (first(gameState)+1, [object], third(gameState)) --TODO add check if object is avail
 
 readNote :: IO()
 readNote = putStrLn "readNote"
@@ -44,10 +71,10 @@ help = putStrLn "help"
 
 command :: [String] -> GameState -> IO ()
 command line gameState = do
-  let cmd = line !! 0
+  let cmd = head line
   case cmd of
     "rozgladam" -> lookAround gameState
-    "podnosze" -> pickUp gameState
+    "podnosze" -> pickUp gameState (line !! 1)
     "czytam" -> readNote
     "uzywam" -> use
     "przegladam" -> showEq
@@ -56,10 +83,10 @@ command line gameState = do
     _ -> putStrLn "Bledna komenda"
 
 initialGameState :: GameState
-initialGameState = [1, 1, 1]
+initialGameState = (0, [], [["klucz", "drzwi", "xd", "xd2"], ["klucz1", "drzwi1", "xd4", "xd3"]])
 
 gameOver :: GameState -> Bool
-gameOver gameState = gameState == [0, 0, 0]
+gameOver gameState = first gameState == 1
 
 game :: GameState -> IO()
 game gameState = do
@@ -70,4 +97,5 @@ game gameState = do
         command tokenizedLine initialGameState
 
 
+main :: IO ()
 main = game initialGameState

@@ -7,7 +7,7 @@ import Prelude
 type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters)
 
 initialGameState :: GameState
-initialGameState = (4, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0]) --TODO change inital state to 0
+initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0]) --TODO change inital state to 0
 
 first :: (a, b, c, d) -> a
 first (a, _, _, _) = a
@@ -74,14 +74,36 @@ lookAround gameState = do
     
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
-  let output = "Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz."
-  putStrLn output
+  let roomId = first(gameState)
+      roomState = third(gameState) !! roomId
+      outputPart1 = "Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi."
+      outputPart2 = " Podchodzisz... Na stole lezy klucz."
+  if isOnList "klucz" roomState then do
+    let outputModified = outputPart1 ++ outputPart2
+    putStrLn outputModified
+  else do
+    putStrLn outputPart1
   game gameState
   
 lookAround1 :: GameState -> IO()
 lookAround1 gameState = do
-  let output = "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet\nTwojego poprzednika, ktoremu nie udalo sie uciec. Szkielet trzyma w rece jakies\nzawiniatko - chyba jest to jakis list. Dodatkowo widzisz jeszcze stolik, na ktorym\nlezy notatka. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."
-  putStrLn output
+  let roomId = first(gameState)
+      roomState = third(gameState) !! roomId
+      outputPart1 = "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet\nTwojego poprzednika, ktoremu nie udalo sie uciec."   
+      outputPart2 = " Szkielet trzyma w rece jakies\nzawiniatko - chyba jest to jakis list."
+      outputPart3 = " Dodatkowo widzisz jeszcze stolik, na ktorym\nlezy notatka."
+      outputPart4 = " Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."
+  if isOnList "zawiniatko" roomState && isOnList "notatka" roomState then do
+    let outputModified = outputPart1 ++ outputPart2 ++ outputPart3 ++ outputPart4
+    putStrLn outputModified
+  else if isOnList "zawiniatko" roomState then do
+    let outputModified = outputPart1 ++ outputPart3 ++ outputPart4
+    putStrLn outputModified
+  else if isOnList "notatka" roomState then do
+    let outputModified = outputPart1 ++ outputPart2 ++ outputPart4
+    putStrLn outputModified
+  else do
+    putStrLn output
   game gameState
 
 lookAround2 :: GameState -> IO()
@@ -173,7 +195,6 @@ use gameState item roomObject = do
       let newInventoryState = removeFromList item inventoryState
           newGameState = (roomId + 1, newInventoryState, roomsState, counters)
       lookAround newGameState
-      game gameState
     else do
       let output = "Nie mozna uzyc " ++ item ++ " z obiektem " ++ roomObject
       putStrLn output

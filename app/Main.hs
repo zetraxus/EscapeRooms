@@ -97,6 +97,7 @@ pickUp gameState item = do
 
 readNote :: GameState -> String -> IO()
 readNote gameState item = do
+  let roomId = first(gameState)
   let inventoryState = second(gameState)
   if isOnList item inventoryState then do
     if item == "list" then do
@@ -105,7 +106,7 @@ readNote gameState item = do
     else if item == "notatka" then do
       putStrLn "Wez liczbe pierwsza pomiedzy 10 a 30, podnies ja do kwadratu, a nastepnie pomnoz przez liczbe pelnych tygodni w kazdym roku."
       game gameState
-    else if item == "papier" then do
+    else if roomId == 2 && item == "papier" then do
       putStrLn "Tam, gdzie pod szafirowym niebem\nrubinowe pola kwiatow kwitna\nlaka sie mieni, jakby szmaragd wielki,\nkuszac strudzonych, by przycuplneli"
       game gameState
     else do
@@ -208,13 +209,14 @@ command line gameState = do
     let cmd = head line
 
     case cmd of
-      "rozejrzyj" -> lookAround gameState
-      "podnies" -> pickUp gameState (line !! 1)
-      "przeczytaj" -> readNote gameState (line !! 1)
+      "rozejrzyj" -> if (length line) == 1 || ((length line) == 2 && (line !! 1) == "sie") then lookAround gameState
+                      else wrongCommand gameState
+      "podnies" -> if (length line) == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
+      "przeczytaj" -> if (length line) == 2 then readNote gameState (line !! 1) else wrongCommand gameState
       "uzyj" -> use gameState (line !! 1) (line !! 2)
-      "polacz" -> craft gameState (line !! 1) (line !! 2)
-      "przegladaj" -> showEq gameState
-      "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then do enterCode gameState (line !! 2)
+      "polacz" -> if (length line) == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
+      "przegladaj" -> if (length line) == 1 then showEq gameState else wrongCommand gameState
+      "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2)
                  else wrongCommand gameState
       "pomocy" -> help gameState
       "koniec" -> exitSuccess

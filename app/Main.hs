@@ -11,7 +11,10 @@ initialGameState :: GameState
 initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["xd"]], [0, 2]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
-worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.", "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.", "Jestes w 3 pokoju"]
+worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.",
+  "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.",
+  "Jestes w trzecim pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek, zas z prawej widzisz trzy kolorowe dzwignie - niebieska, zielona i czerwona. Pod regalem znajduje sie sterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki, zgnieciony papier, paczke zapalek i kilka drobnych monet.",
+  "Jestes w 4 pokoju."]
 
 first :: (a, b, c, d) -> a
 first (a, _, _, _) = a

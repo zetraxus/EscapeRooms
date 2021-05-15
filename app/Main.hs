@@ -8,7 +8,7 @@ type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (4, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"]], [0, 2, 0, 0, 0]) --TODO change inital state to 0
+initialGameState = (4, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"]], [0, 2, 0, 0, 0]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
 worldDescription = ["Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz.",
@@ -69,7 +69,8 @@ printGameState gameState = do
 
 lookAround :: GameState -> IO()
 lookAround gameState = do
-  --printGameState gameState
+  printGameState gameState
+
   let roomId = first(gameState)
       description = worldDescription
   putStrLn (description !! roomId)
@@ -80,6 +81,10 @@ addElementToEq inventoryState item = do
   if (item == "worek") then do inventoryState ++ ["czerwona-przekladnia", "niebieska-przekladnia", "zielona-przekladnia"]
     else do inventoryState ++ [item]
 
+addElementToRoom :: [String] -> String -> [String]
+addElementToRoom roomState item = do
+  roomState ++ [item]
+
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do
   let roomId = first(gameState)
@@ -89,17 +94,21 @@ pickUp gameState item = do
       currentRoomState = roomsState !! roomId
 
   if isOnList item currentRoomState then do --check if on the list
-    let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
-        newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
-        newInventoryState = addElementToEq inventoryState item
-        newGameState = (roomId, newInventoryState, newRoomsState, counters) --update gameState
-        output = "Podnosisz " ++ item
-    putStrLn output
-    game newGameState
-  else do
-    let output = item ++ " nie ma w pokoju"
-    putStrLn output
-    game gameState
+    if (item == "cialo" || item == "cialo-bez-reki") then do
+      putStrLn "Nie mozna podniesc ciala - jest za ciezkie."
+      game gameState
+      else do
+        let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
+            newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
+            newInventoryState = addElementToEq inventoryState item
+            newGameState = (roomId, newInventoryState, newRoomsState, counters) --update gameState
+            output = "Podnosisz " ++ item
+        putStrLn output
+        game newGameState
+    else do
+      let output = item ++ " nie ma w pokoju"
+      putStrLn output
+      game gameState
 
 readNote :: GameState -> String -> IO()
 readNote gameState item = do
@@ -140,7 +149,18 @@ use gameState item roomObject = do
       let newInventoryState = removeFromList item inventoryState
           newGameState = (roomId + 1, newInventoryState, roomsState, counters)
       lookAround newGameState
-      game gameState
+    else if roomId == 4 && (item == "pila" || item == "siekiera") && roomObject == "cialo" then do
+      let newCurrentRoomState = removeFromList roomObject currentRoomState --remove roomObject currentRoom
+          newCurrentRoomState2 = addElementToRoom newCurrentRoomState "cialo-bez-reki"
+          newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "reka"
+          newRoomsState = replaceNth roomId newCurrentRoomState3 roomsState --update roomsState
+          newGameState = (roomId, inventoryState, newRoomsState, counters)
+      putStrLn "Odciales reke od ciala"
+      game newGameState
+    else if roomId == 4 && item == "reka" && roomObject == "czytnik" then do
+      let newInventoryState = removeFromList item inventoryState
+          newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+      lookAround newGameState
     else do
       let output = "Nie mozna uzyc " ++ item ++ " z obiektem " ++ roomObject
       putStrLn output

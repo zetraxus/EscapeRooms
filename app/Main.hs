@@ -7,10 +7,10 @@ type GameState = (Int, [String], [[String]]) -- (nr pokoju, inventory, [p1, p2, 
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (1, [], [["klucz"], ["notatka", "list"]]) --TODO change inital state to 0
+initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["xd"]]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
-worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.", "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."]
+worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.", "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.", "Jestes w 3 pokoju"]
 
 first :: (a, b, c) -> a
 first (a, _, _) = a
@@ -109,7 +109,7 @@ use gameState item roomObject = do
       let newInventoryState = removeFromList item inventoryState
           newGameState = (roomId + 1, newInventoryState, roomsState)
       lookAround newGameState
---    else if roomId == 0 && item == "xd" && roomObject == "xd2" then do
+--    else if roomId == 1 && item == "xd" && roomObject == "xd2" then do
 --      game gameState
     else do
       putStrLn "Nie mozna uzyc przedmiotu z tym obiektem"
@@ -124,15 +124,24 @@ showEq gameState = do
   print inventoryState
   game gameState
 
-enterCode :: IO()
-enterCode = putStrLn "enterCode"
---Good code for level 2: 27508, po 3 probach skoncz gre z informacja o przegranej
+enterCode :: GameState -> String -> IO()
+enterCode gameState code = do
+  if code == "27508" then do
+    putStrLn "bzzz: RAWIDLOWY KOD"
+    let roomId = first(gameState)
+        inventoryState = second(gameState)
+        roomsState = third(gameState)
+        newGameState = (roomId + 1, inventoryState, roomsState)
+    lookAround newGameState
+  else do 
+     putStrLn "bzzz: ZLY KOD"
+--TODO Good code for level 2: 27508, po 3 probach skoncz gre z informacja o przegranej
 
 help :: GameState -> IO()
 help gameState = do
   putStrLn "=============="
   putStrLn "Dostepne komendy:"
-  putStrLn "rozejrzyj sie, podnies, czytaj, uzyj, przegladaj ekwipunek, wpisz kod"
+  putStrLn "rozejrzyj sie, podnies, przeczytaj, uzyj, przegladaj ekwipunek, wpisz kod"
   putStrLn "=============="
   game gameState
 
@@ -146,13 +155,13 @@ command line gameState = do
     "przeczytaj" -> readNote gameState (line !! 1)
     "uzyj" -> use gameState (line !! 1) (line !! 2)
     "przegladaj" -> showEq gameState
-    "wpisz" -> enterCode
+    "wpisz" -> enterCode gameState (line !! 1)
     "pomocy" -> help gameState
     _ -> do putStrLn "Bledna komenda!"
             help gameState 
 
 gameOver :: GameState -> Bool
-gameOver gameState = first(gameState) == 2
+gameOver gameState = first(gameState) == 3
 
 game :: GameState -> IO()
 game gameState = do

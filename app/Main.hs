@@ -8,12 +8,12 @@ type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (3, [], [["klucz"], ["notatka", "list"], ["papier"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"]], [0, 2]) --TODO change inital state to 0
+initialGameState = (2, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"]], [0, 2]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
 worldDescription = ["Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz. Wstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje namazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszce stolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz.",
   "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet Twojego poprzednika, ktoremu nie udalo sie uciec. Szkielet trzyma w rece jakies zawiniatko - chyba jest to jakis list. Dodatkowo widzisz jeszcze stolik, na ktorym lezy notatka. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.",
-  "Wchodzisz do kolejnego pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek, zas z prawej widzisz trzy kolorowe dzwignie - niebieska, zielona i czerwona. Pod regalem znajduje sie sterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki, zgnieciony papier, paczke zapalek i kilka drobnych monet.",
+  "Wchodzisz do kolejnego pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek, zas z prawej widzisz dziwny panel z trzema otworami. Pod regalem znajduje sie sterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki, zgnieciony papier, paczke zapalek i kilka drobnych monet. W rogu pokoju stoi worek z trzema kolorowymi przekladniami - niebieska, zielona i czerwona.",
   "W nastepnym pomieszczeniu nic nie widac. Wszedzie unosi sie dym. Jednak nie masz wyjscia, wchodzisz do pomieszczenia zaslaniajac usta i nos rekami. Drzwi zatrzaskuja sie za Toba. Po omacku badasz pomieszczenie. Na podlodze lezy kawalek drutu, blaszka, butelka z woda i recznik. Moczysz recznik woda i tworzysz z niego cos w rodzaju maski. Teraz mozesz ekplorowac dalej. Znajdujesz drzwi. Nie ma zamka, zamiast niego natrafiasz na stara klodke.",
   "Po odblokowaniu drzwi pedzisz dalej co sil w nogach, by tylko nabrac do pluc swiezego powietrza. Niestety, gdy opuszczasz kleby dymu, do Twoich nozdrzy dociera okropny smrod. Dookola panuje mrok. Nie jestes w stanie wytrzymac odoru i zwracasz swoje sniadanie wprost przed siebie. Po chwili decydujesz sie przejsc po omacku dalej, ale Twoja noga trafia na cos miekkiego. Gdy twoj wzrok przyzwyczaja sie do ciemnosci, zauwazasz, ze nadepnales na cialo 50 letniego mezczyzny w stanie rozkladu. Kucasz, by mu sie przyjrzec, lecz nie zauwazasz nic nadzwyczajnego. Podnosisz glowe i w oddali zauwazasz ledwo swiecacy ekran. Gdy sie do niego zblizasz, odczytujesz, ze jest to czytnik linii papilarnych, do ktorego przykladasz dlon - niestety na ekranie pojawia sie komunikat \"brak dostepu\". Stojac wciaz w tym samym miejscu i powstrzymujac odruchy wymiotne, wytezasz wzrok i w przeciwleglym rogu dostrzegasz kontury narzedzi stolarskich - pile mechaniczna, siekiere, papier scierny i roznego rodzaju pilniki."]
 
@@ -75,6 +75,11 @@ lookAround gameState = do
   putStrLn (description !! roomId)
   game gameState
 
+addElementToEq :: [String] -> String -> [String]
+addElementToEq inventoryState item = do
+  if (item == "worek") then do inventoryState ++ ["czerwona-przekladnia", "niebieska-przekladnia", "zielona-przekladnia"]
+    else do inventoryState ++ [item]
+
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do
   let roomId = first(gameState)
@@ -86,7 +91,8 @@ pickUp gameState item = do
   if isOnList item currentRoomState then do --check if on the list
     let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
         newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
-        newGameState = (roomId, inventoryState ++ [item], newRoomsState, counters) --update gameState
+        newInventoryState = addElementToEq inventoryState item
+        newGameState = (roomId, newInventoryState, newRoomsState, counters) --update gameState
         output = "Podnosisz " ++ item
     putStrLn output
     game newGameState
@@ -224,7 +230,7 @@ command line gameState = do
       "przeczytaj" -> if (length line) == 2 then readNote gameState (line !! 1) else wrongCommand gameState
       "uzyj" -> use gameState (line !! 1) (line !! 2)
       "polacz" -> if (length line) == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
-      "przegladaj" -> if (length line) == 1 then showEq gameState else wrongCommand gameState
+      "przegladaj" -> if (length line) == 1 || ((length line) == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
       "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2)
                  else wrongCommand gameState
       "pomocy" -> help gameState

@@ -87,12 +87,12 @@ pickUp gameState item = do
     let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
         newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
         newGameState = (roomId, inventoryState ++ [item], newRoomsState, counters) --update gameState
-    putStr "Podnosisz "
-    putStr item
-    putStr "\n"
+        output = "Podnosisz " ++ item
+    putStrLn output
     game newGameState
   else do
-    print "Przedmiotu nie ma w pokoju"
+    let output = item ++ " nie ma w pokoju"
+    putStrLn output
     game gameState
 
 readNote :: GameState -> String -> IO()
@@ -110,10 +110,12 @@ readNote gameState item = do
       putStrLn "Tam, gdzie pod szafirowym niebem\nrubinowe pola kwiatow kwitna\nlaka sie mieni, jakby szmaragd wielki,\nkuszac strudzonych, by przycuplneli"
       game gameState
     else do
-      putStrLn "Nie mozesz przeczytac tego przedmiotu"
+      let output = "Nie mozesz przeczytac " ++ item
+      putStrLn output
       game gameState
   else do
-    putStrLn "Nie posiadasz przedmiotu o takiej nazwie"
+    let output = "Nie posiadasz " ++ item
+    putStrLn output
     game gameState
   
 
@@ -135,10 +137,12 @@ use gameState item roomObject = do
       lookAround newGameState
       game gameState
     else do
-      putStrLn "Nie mozna uzyc przedmiotu z tym obiektem"
+      let output = "Nie mozna uzyc " ++ item ++ " z obiektem " ++ roomObject
+      putStrLn output
       game gameState
   else do
-    putStrLn "Nie posiadasz przedmiotu o takiej nazwie"
+    let output = "Nie posiadasz przedmiotu " ++ item
+    putStrLn output
     game gameState
 
 craft :: GameState -> String -> String -> IO()
@@ -158,10 +162,12 @@ craft gameState item1 item2 = do
 --    else if roomId == 1 && item == "xd" && roomObject == "xd2" then do
 --      game gameState
     else do
-      putStrLn "Nie mozna uzyc przedmiotu z tym obiektem" --TODO add item name
+      let output = "Nie mozna polaczyc " ++ item1 ++ " z " ++ item2
+      putStrLn output
       game gameState
   else do
-    putStrLn "Nie posiadasz przedmiotu o takiej nazwie"
+    let output = "Nie posiadasz " ++ item1 ++ " lub " ++ item2
+    putStrLn output
     game gameState
 
 showEq :: GameState -> IO()
@@ -181,7 +187,7 @@ enterCode gameState code = do
     putStrLn "bzzz: RAWIDLOWY KOD" 
     let newGameState = (roomId + 1, inventoryState, roomsState, counters)
     lookAround newGameState
-  else if triesLeftCode == 0 then do 
+  else if triesLeftCode == 0 then do
     putStrLn "bzzz: ZLY KOD"
     putStrLn "52"
     putStrLn "Koniec gry: Umarles z glodu!"

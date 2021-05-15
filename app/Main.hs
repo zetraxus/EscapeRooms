@@ -8,7 +8,7 @@ type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (4, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"]], [0, 2]) --TODO change inital state to 0
+initialGameState = (4, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"]], [0, 2, 0, 0, 0]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
 worldDescription = ["Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz.",
@@ -123,7 +123,6 @@ readNote gameState item = do
     let output = "Nie posiadasz " ++ item
     putStrLn output
     game gameState
-  
 
 use :: GameState -> String -> String -> IO()
 use gameState item roomObject = do
@@ -198,11 +197,16 @@ enterCode gameState code = do
     putStrLn "52"
     putStrLn "Koniec gry: Umarles z glodu!"
   else do
-    let newTriesLeftCode = triesLeftCode - 1
-        newCounters = replaceNth roomId newTriesLeftCode counters --update counters
+    let newCounters = incrementCounter (-1) roomId counters
         newGameState = (roomId, inventoryState, roomsState, newCounters) --update gameState
     putStrLn "bzzz: ZLY KOD"
     game newGameState
+    
+incrementCounter :: Int -> Int -> [Int] -> [Int]
+incrementCounter value roomId counters = do
+  let counterValue = counters !! roomId --TODO check if exists
+      newValue = counterValue + value
+  replaceNth roomId newValue counters --update counters
 
 help :: GameState -> IO()
 help gameState = do

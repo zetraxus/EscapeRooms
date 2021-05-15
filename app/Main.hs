@@ -4,23 +4,26 @@ import System.IO (hFlush, stdout)
 import System.Exit
 import Prelude
 
-type GameState = (Int, [String], [[String]]) -- (nr pokoju, inventory, [p1, p2, p3...])
+type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters)
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["xd"]]) --TODO change inital state to 0
+initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["xd"]], [0, 2]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
 worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.", "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.", "Jestes w 3 pokoju"]
 
-first :: (a, b, c) -> a
-first (a, _, _) = a
+first :: (a, b, c, d) -> a
+first (a, _, _, _) = a
 
-second :: (a, b, c) -> b
-second (_, b, _) = b
+second :: (a, b, c, d) -> b
+second (_, b, _, _) = b
 
-third :: (a, b, c) -> c
-third (_, _, c) = c
+third :: (a, b, c, d) -> c
+third (_, _, c, _) = c
+
+fourth :: (a, b, c, d) -> d
+fourth (_, _, _, d) = d
 
 removeFromList :: Eq a => a -> [a] -> [a]
 removeFromList _ [] = []
@@ -53,9 +56,11 @@ printGameState gameState = do
   let roomId = first(gameState)
       inventory = second(gameState)
       roomState = third(gameState) !! roomId
+      counters = fourth(gameState)
   print roomId
   print inventory
   print roomState
+  print counters
   putStrLn "=============="
 
 lookAround :: GameState -> IO()
@@ -69,13 +74,15 @@ lookAround gameState = do
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do
   let roomId = first(gameState)
+      inventoryState = second(gameState)
       roomsState = third(gameState)
+      counters = fourth(gameState)
       currentRoomState = roomsState !! roomId
 
   if isOnList item currentRoomState then do --check if on the list
     let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
         newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
-        newGameState = (roomId, second(gameState) ++ [item], newRoomsState) --update gameState
+        newGameState = (roomId, inventoryState ++ [item], newRoomsState, counters) --update gameState
     game newGameState
   else do
     print "Przedmiotu nie ma w pokoju"
@@ -104,11 +111,12 @@ use gameState item roomObject = do
   let roomId = first(gameState)
       inventoryState = second(gameState)
       roomsState = third(gameState)
+      counters = fourth(gameState)
       currentRoomState = roomsState !! roomId
   if isOnList item inventoryState then do
     if roomId == 0 && item == "klucz" && roomObject == "drzwi" then do
       let newInventoryState = removeFromList item inventoryState
-          newGameState = (roomId + 1, newInventoryState, roomsState)
+          newGameState = (roomId + 1, newInventoryState, roomsState, counters)
       lookAround newGameState
 --    else if roomId == 1 && item == "xd" && roomObject == "xd2" then do
 --      game gameState
@@ -127,16 +135,25 @@ showEq gameState = do
 
 enterCode :: GameState -> String -> IO()
 enterCode gameState code = do
+  let roomId = first(gameState)
+      inventoryState = second(gameState)
+      roomsState = third(gameState)
+      counters = fourth(gameState)
+      triesLeftCode = counters !! roomId
   if code == "27508" then do
-    putStrLn "bzzz: PRAWIDLOWY KOD"
-    let roomId = first(gameState)
-        inventoryState = second(gameState)
-        roomsState = third(gameState)
-        newGameState = (roomId + 1, inventoryState, roomsState)
+    putStrLn "bzzz: RAWIDLOWY KOD" 
+    let newGameState = (roomId + 1, inventoryState, roomsState, counters)
     lookAround newGameState
-  else do 
-     putStrLn "bzzz: ZLY KOD"
---TODO Good code for level 2: 27508, po 3 probach skoncz gre z informacja o przegranej
+  else if triesLeftCode == 0 then do 
+    putStrLn "bzzz: ZLY KOD"
+    putStrLn "52"
+    putStrLn "Koniec gry: Umarles z glodu!"
+  else do
+    let newTriesLeftCode = triesLeftCode - 1
+        newCounters = replaceNth roomId newTriesLeftCode counters --update counters
+        newGameState = (roomId, inventoryState, roomsState, newCounters) --update gameState
+    putStrLn "bzzz: ZLY KOD"
+    game newGameState
 
 help :: GameState -> IO()
 help gameState = do

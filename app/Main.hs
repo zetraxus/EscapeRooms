@@ -7,14 +7,7 @@ import Prelude
 type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters)
 
 initialGameState :: GameState
-initialGameState = (4, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0]) --TODO change inital state to 0
-
-worldDescription :: WorldDescription
-worldDescription = ["Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz.",
-  "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet\nTwojego poprzednika, ktoremu nie udalo sie uciec. Szkielet trzyma w rece jakies\nzawiniatko - chyba jest to jakis list. Dodatkowo widzisz jeszcze stolik, na ktorym\nlezy notatka. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.",
-  "Wchodzisz do kolejnego pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek,\nzas z prawej widzisz dziwny panel z trzema otworami. Pod regalem znajduje sie\nsterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki,\nzgnieciony papier, paczke zapalek i kilka drobnych monet. W rogu pokoju stoi worek\nz trzema kolorowymi przekladniami - niebieska, zielona i czerwona.",
-  "W nastepnym pomieszczeniu nic nie widac. Wszedzie unosi sie dym. Jednak nie masz wyjscia,\nwchodzisz do pomieszczenia zaslaniajac usta i nos rekami. Drzwi zatrzaskuja sie za Toba.\nPo omacku badasz pomieszczenie. Na podlodze lezy kawalek drutu, blaszka, butelka z woda\ni recznik. Moczysz recznik woda i tworzysz z niego cos w rodzaju maski. Teraz mozesz\neksplorowac dalej. Znajdujesz drzwi. Nie ma zamka, zamiast niego natrafiasz na stara klodke.",
-  "Po odblokowaniu drzwi pedzisz dalej co sil w nogach, by tylko nabrac do pluc swiezego\npowietrza. Niestety, gdy opuszczasz kleby dymu, do Twoich nozdrzy dociera okropny\nsmrod. Dookola panuje mrok. Nie jestes w stanie wytrzymac odoru i zwracasz swoje\nsniadanie wprost przed siebie. Po chwili decydujesz sie przejsc po omacku dalej,\nale Twoja noga trafia na cos miekkiego. Gdy twoj wzrok przyzwyczaja sie do ciemnosci,\nzauwazasz, ze nadepnales na cialo 50 letniego mezczyzny w stanie rozkladu. Kucasz,\nby mu sie przyjrzec, lecz nie zauwazasz nic nadzwyczajnego. Podnosisz glowe i w oddali\nzauwazasz ledwo swiecacy ekran. Gdy sie do niego zblizasz, odczytujesz, ze jest to\nczytnik linii papilarnych, do ktorego przykladasz dlon - niestety na ekranie pojawia\nsie komunikat \"brak dostepu\". Stojac wciaz w tym samym miejscu i powstrzymujac odruchy\nwymiotne, wytezasz wzrok i w przeciwleglym rogu dostrzegasz kontury narzedzi stolarskich:\npile mechaniczna, siekiere, papier scierny i roznego rodzaju pilniki."]
+initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0]) --TODO change inital state to 0
 
 first :: (a, b, c, d) -> a
 first (a, _, _, _) = a
@@ -81,14 +74,36 @@ lookAround gameState = do
 
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
-  let output = "Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz."
-  putStrLn output
+  let roomId = first(gameState)
+      roomState = third(gameState) !! roomId
+      outputPart1 = "Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi."
+      outputPart2 = " Podchodzisz... Na stole lezy klucz."
+  if isOnList "klucz" roomState then do
+    let outputModified = outputPart1 ++ outputPart2
+    putStrLn outputModified
+  else do
+    putStrLn outputPart1
   game gameState
 
 lookAround1 :: GameState -> IO()
 lookAround1 gameState = do
-  let output = "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet\nTwojego poprzednika, ktoremu nie udalo sie uciec. Szkielet trzyma w rece jakies\nzawiniatko - chyba jest to jakis list. Dodatkowo widzisz jeszcze stolik, na ktorym\nlezy notatka. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."
-  putStrLn output
+  let roomId = first(gameState)
+      roomState = third(gameState) !! roomId
+      outputPart1 = "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet\nTwojego poprzednika, ktoremu nie udalo sie uciec."
+      outputPart2 = " Szkielet trzyma w rece jakies\nzawiniatko - chyba jest to jakis list."
+      outputPart3 = " Dodatkowo widzisz jeszcze stolik, na ktorym\nlezy notatka."
+      outputPart4 = " Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."
+  if isOnList "zawiniatko" roomState && isOnList "notatka" roomState then do
+    let outputModified = outputPart1 ++ outputPart2 ++ outputPart3 ++ outputPart4
+    putStrLn outputModified
+  else if isOnList "zawiniatko" roomState then do
+    let outputModified = outputPart1 ++ outputPart3 ++ outputPart4
+    putStrLn outputModified
+  else if isOnList "notatka" roomState then do
+    let outputModified = outputPart1 ++ outputPart2 ++ outputPart4
+    putStrLn outputModified
+  else do
+    putStrLn output
   game gameState
 
 lookAround2 :: GameState -> IO()

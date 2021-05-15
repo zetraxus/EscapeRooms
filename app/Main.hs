@@ -208,7 +208,7 @@ help :: GameState -> IO()
 help gameState = do
   putStrLn "=============="
   putStrLn "Dostepne komendy:"
-  putStrLn "rozejrzyj sie, podnies, przeczytaj, uzyj, przegladaj ekwipunek, wpisz kod, koniec"
+  putStrLn "rozejrzyj sie, podnies, przeczytaj, uzyj, polacz, przegladaj ekwipunek, wpisz kod, pomocy, koniec"
   putStrLn "=============="
   game gameState
 
@@ -224,15 +224,13 @@ command line gameState = do
     let cmd = head line
 
     case cmd of
-      "rozejrzyj" -> if (length line) == 1 || ((length line) == 2 && (line !! 1) == "sie") then lookAround gameState
-                      else wrongCommand gameState
+      "rozejrzyj" -> if (length line) == 1 || ((length line) == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
       "podnies" -> if (length line) == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
       "przeczytaj" -> if (length line) == 2 then readNote gameState (line !! 1) else wrongCommand gameState
       "uzyj" -> use gameState (line !! 1) (line !! 2)
       "polacz" -> if (length line) == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
       "przegladaj" -> if (length line) == 1 || ((length line) == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
-      "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2)
-                 else wrongCommand gameState
+      "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState
       "pomocy" -> help gameState
       "koniec" -> exitSuccess
       _ -> do wrongCommand gameState

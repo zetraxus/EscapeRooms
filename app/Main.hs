@@ -129,8 +129,11 @@ use gameState item roomObject = do
       let newInventoryState = removeFromList item inventoryState
           newGameState = (roomId + 1, newInventoryState, roomsState, counters)
       lookAround newGameState
---    else if roomId == 1 && item == "xd" && roomObject == "xd2" then do
---      game gameState
+    else if roomId == 3 && item == "wytrych" && roomObject == "drzwi" then do
+      let newInventoryState = removeFromList item inventoryState
+          newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+      lookAround newGameState
+      game gameState
     else do
       putStrLn "Nie mozna uzyc przedmiotu z tym obiektem"
       game gameState

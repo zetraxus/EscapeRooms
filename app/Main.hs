@@ -8,7 +8,7 @@ type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["papier"], [], ["pila", "siekiera", "papier", "cialo"]], [0, 2]) --TODO change inital state to 0
+initialGameState = (3, [], [["klucz"], ["notatka", "list"], ["papier"], ["drut", "blaszka"], ["pila", "siekiera", "papier", "cialo"]], [0, 2]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
 worldDescription = ["Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz. Wstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje namazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszce stolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz.",
@@ -137,6 +137,29 @@ use gameState item roomObject = do
     putStrLn "Nie posiadasz przedmiotu o takiej nazwie"
     game gameState
 
+craft :: GameState -> String -> String -> IO()
+craft gameState item1 item2 = do
+  let roomId = first(gameState)
+      inventoryState = second(gameState)
+      roomsState = third(gameState)
+      counters = fourth(gameState)
+  if isOnList item1 inventoryState && isOnList item2 inventoryState then do
+    if (item1 == "drut" && item2 == "blaszka") || (item1 == "blaszka" && item2 == "drut") then do
+      let newInventoryState = removeFromList item1 inventoryState
+          newInventoryState2 = removeFromList item2 newInventoryState
+          newInventoryState3 = newInventoryState2 ++ ["wytrych"]
+          newGameState = (roomId, newInventoryState3, roomsState, counters)
+      putStrLn "Zrobiles wytrych"
+      game newGameState
+--    else if roomId == 1 && item == "xd" && roomObject == "xd2" then do
+--      game gameState
+    else do
+      putStrLn "Nie mozna uzyc przedmiotu z tym obiektem" --TODO add item name
+      game gameState
+  else do
+    putStrLn "Nie posiadasz przedmiotu o takiej nazwie"
+    game gameState
+
 showEq :: GameState -> IO()
 showEq gameState = do
   let inventoryState = second(gameState)
@@ -189,6 +212,7 @@ command line gameState = do
       "podnies" -> pickUp gameState (line !! 1)
       "przeczytaj" -> readNote gameState (line !! 1)
       "uzyj" -> use gameState (line !! 1) (line !! 2)
+      "polacz" -> craft gameState (line !! 1) (line !! 2)
       "przegladaj" -> showEq gameState
       "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then do enterCode gameState (line !! 2)
                  else wrongCommand gameState
@@ -197,7 +221,7 @@ command line gameState = do
       _ -> do wrongCommand gameState
 
 gameOver :: GameState -> Bool
-gameOver gameState = first(gameState) == 3
+gameOver gameState = first(gameState) == 5
 
 game :: GameState -> IO()
 game gameState = do

@@ -11,9 +11,9 @@ initialGameState :: GameState
 initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["xd"]], [0, 2]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
-worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.",
-  "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.",
-  "Jestes w trzecim pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek, zas z prawej widzisz trzy kolorowe dzwignie - niebieska, zielona i czerwona. Pod regalem znajduje sie sterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki, zgnieciony papier, paczke zapalek i kilka drobnych monet.",
+worldDescription = ["Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz. Wstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje namazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszce stolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz.",
+  "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet Twojego poprzednika, ktoremu nie udalo sie uciec. Szkielet trzyma w rece jakies zawiniatko - chyba jest to jakis list. Dodatkowo widzisz jeszcze stolik, na ktorym lezy notatka. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.",
+  "Wchodzisz do kolejnego pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek, zas z prawej widzisz trzy kolorowe dzwignie - niebieska, zielona i czerwona. Pod regalem znajduje sie sterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki, zgnieciony papier, paczke zapalek i kilka drobnych monet.",
   "Jestes w 4 pokoju."]
 
 first :: (a, b, c, d) -> a

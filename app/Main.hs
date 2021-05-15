@@ -1,6 +1,7 @@
 module Main where
 
 import System.IO (hFlush, stdout)
+import System.Exit
 import Prelude
 
 type GameState = (Int, [String], [[String]]) -- (nr pokoju, inventory, [p1, p2, p3...])
@@ -88,7 +89,7 @@ readNote gameState item = do
       putStrLn "Witaj podrozniku!\nJesli czytasz ten list prawdopodobnie jestes w takiej samej sytuacji jak ja teraz. Notatka jest zdradliwa, aby otworzyc drzwi musisz podac prawidlowy kod, jednak notatka nie precyzuje dokladnie jaki jest kod. Niestety po 3 probie wpisanie kodu mechanizm zablokowal sie, a na wyswietlaczu pojawil sie licznik. Po kilku dniach zorientowalem sie, ze licznik pokazuje liczbe dni do jakiegos wydarzenia. (Byc moze do oblokowania mechanizmu) Zostaly mi jeszcze 83 dni. Jesli to czytasz chcialbym Cie poinformowac, ze poczatkowe liczby pierwsze, ktore wyznaczylem do obliczenia kodu to 11, 13 i 29. Niestety zadna z nich nie jest prawidlowa.\nSprawdz inne liczby. Moze Ci sie uda.\nPowodzenia!"
       game gameState
     else if item == "notatka" then do
-      putStrLn "Wez liczbe pierwsza pomiedzy 10, a 30, podnies ja do kwadratu, a nastepnie pomnoz przez liczbe pelnych tygodni w kazdym roku."
+      putStrLn "Wez liczbe pierwsza pomiedzy 10 a 30, podnies ja do kwadratu, a nastepnie pomnoz przez liczbe pelnych tygodni w kazdym roku."
       game gameState
     else do
       putStrLn "Nie mozesz przeczytac tego przedmiotu"
@@ -127,7 +128,7 @@ showEq gameState = do
 enterCode :: GameState -> String -> IO()
 enterCode gameState code = do
   if code == "27508" then do
-    putStrLn "bzzz: RAWIDLOWY KOD"
+    putStrLn "bzzz: PRAWIDLOWY KOD"
     let roomId = first(gameState)
         inventoryState = second(gameState)
         roomsState = third(gameState)
@@ -141,7 +142,7 @@ help :: GameState -> IO()
 help gameState = do
   putStrLn "=============="
   putStrLn "Dostepne komendy:"
-  putStrLn "rozejrzyj sie, podnies, przeczytaj, uzyj, przegladaj ekwipunek, wpisz kod"
+  putStrLn "rozejrzyj sie, podnies, przeczytaj, uzyj, przegladaj ekwipunek, wpisz kod, koniec"
   putStrLn "=============="
   game gameState
 
@@ -155,8 +156,10 @@ command line gameState = do
     "przeczytaj" -> readNote gameState (line !! 1)
     "uzyj" -> use gameState (line !! 1) (line !! 2)
     "przegladaj" -> showEq gameState
-    "wpisz" -> enterCode gameState (line !! 1)
+    "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2)
+               else command ["pomocy"] gameState
     "pomocy" -> help gameState
+    "koniec" -> exitSuccess
     _ -> do putStrLn "Bledna komenda!"
             help gameState 
 

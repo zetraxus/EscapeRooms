@@ -8,13 +8,14 @@ type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["xd"]], [0, 2]) --TODO change inital state to 0
+initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["papier"], [], ["pila", "siekiera", "papier", "cialo"]], [0, 2]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
 worldDescription = ["Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz. Wstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje namazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszce stolik oraz wielkie czerwone drzwi. Podchodzisz... Na stole lezy klucz.",
   "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet Twojego poprzednika, ktoremu nie udalo sie uciec. Szkielet trzyma w rece jakies zawiniatko - chyba jest to jakis list. Dodatkowo widzisz jeszcze stolik, na ktorym lezy notatka. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.",
   "Wchodzisz do kolejnego pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek, zas z prawej widzisz trzy kolorowe dzwignie - niebieska, zielona i czerwona. Pod regalem znajduje sie sterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki, zgnieciony papier, paczke zapalek i kilka drobnych monet.",
-  "Jestes w 4 pokoju."]
+  "Jestes w 4 pokoju.",
+  "Po odblokowaniu drzwi pedzisz dalej co sil w nogach, by tylko nabrac do pluc swiezego powietrza. Niestety, gdy opuszczasz kleby dymu, do Twoich nozdrzy dociera okropny smrod. Dookola panuje mrok. Nie jestes w stanie wytrzymac odoru i zwracasz swoje sniadanie wprost przed siebie. Po chwili decydujesz sie przejsc po omacku dalej, ale Twoja noga trafia na cos miekkiego. Gdy twoj wzrok przyzwyczaja sie do ciemnosci, zauwazasz, ze nadepnales na cialo 50 letniego mezczyzny w stanie rozkladu. Kucasz, by mu sie przyjrzec, lecz nie zauwazasz nic nadzwyczajnego. Podnosisz glowe i w oddali zauwazasz ledwo swiecacy ekran. Gdy sie do niego zblizasz, odczytujesz, ze jest to czytnik linii papilarnych, do ktorego przykladasz dlon - niestety na ekranie pojawia sie komunikat \"brak dostepu\". Stojac wciaz w tym samym miejscu i powstrzymujac odruchy wymiotne, wytezasz wzrok i w przeciwleglym rogu dostrzegasz kontury narzedzi stolarskich - pile mechaniczna, siekiere, papier scierny i roznego rodzaju pilniki."]
 
 first :: (a, b, c, d) -> a
 first (a, _, _, _) = a
@@ -100,6 +101,9 @@ readNote gameState item = do
       game gameState
     else if item == "notatka" then do
       putStrLn "Wez liczbe pierwsza pomiedzy 10 a 30, podnies ja do kwadratu, a nastepnie pomnoz przez liczbe pelnych tygodni w kazdym roku."
+      game gameState
+    else if item == "papier" then do
+      putStrLn "Tam, gdzie pod szafirowym niebem\nrubinowe pola kwiatow kwitna\nlaka sie mieni, jakby szmaragd wielki,\nkuszac strudzonych, by przycuplneli"
       game gameState
     else do
       putStrLn "Nie mozesz przeczytac tego przedmiotu"

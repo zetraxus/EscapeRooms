@@ -146,22 +146,28 @@ help gameState = do
   putStrLn "=============="
   game gameState
 
+wrongCommand :: GameState -> IO()
+wrongCommand gameState = do
+  putStrLn "Bledna komenda!"
+  help gameState
+
 command :: [String] -> GameState -> IO ()
 command line gameState = do
-  let cmd = head line
-  --TODO error check if line !! 3 exist
-  case cmd of
-    "rozejrzyj" -> lookAround gameState
-    "podnies" -> pickUp gameState (line !! 1)
-    "przeczytaj" -> readNote gameState (line !! 1)
-    "uzyj" -> use gameState (line !! 1) (line !! 2)
-    "przegladaj" -> showEq gameState
-    "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2)
-               else command ["pomocy"] gameState
-    "pomocy" -> help gameState
-    "koniec" -> exitSuccess
-    _ -> do putStrLn "Bledna komenda!"
-            help gameState 
+  if (length line) > 3 then wrongCommand gameState
+  else do
+    let cmd = head line
+
+    case cmd of
+      "rozejrzyj" -> lookAround gameState
+      "podnies" -> pickUp gameState (line !! 1)
+      "przeczytaj" -> readNote gameState (line !! 1)
+      "uzyj" -> use gameState (line !! 1) (line !! 2)
+      "przegladaj" -> showEq gameState
+      "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then do enterCode gameState (line !! 2)
+                 else wrongCommand gameState
+      "pomocy" -> help gameState
+      "koniec" -> exitSuccess
+      _ -> do wrongCommand gameState
 
 gameOver :: GameState -> Bool
 gameOver gameState = first(gameState) == 3

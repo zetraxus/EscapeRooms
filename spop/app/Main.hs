@@ -7,10 +7,10 @@ type GameState = (Int, [String], [[String]]) -- (nr pokoju, inventory, [p1, p2, 
 type WorldDescription = [String]
 
 initialGameState :: GameState
-initialGameState = (1, [], [["klucz"], ["notatka", "list"]]) --TODO change inital state to 0
+initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["xd"]]) --TODO change inital state to 0
 
 worldDescription :: WorldDescription
-worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.", "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."]
+worldDescription = ["Jestes w pierwszym pokoju. Widzisz lezacy na stole klucz oraz wielkie czerwone drzwi.", "Jestes w drugim pokoju. Widzisz przed soba stolik, na stole lezy notatka. Na podlodze leza szkielet czlowieka, ktory trzyma w rece list. Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod.", "Jestes w 3 pokoju"]
 
 first :: (a, b, c) -> a
 first (a, _, _) = a
@@ -129,10 +129,10 @@ enterCode gameState code = do
   if code == "27508" then do
     putStrLn "bzzz: RAWIDLOWY KOD"
     let roomId = first(gameState)
-      inventoryState = second(gameState)
-      roomsState = third(gameState)
-      newGameState = (roomId + 1, inventoryState, roomsState)
-    game newGameState
+        inventoryState = second(gameState)
+        roomsState = third(gameState)
+        newGameState = (roomId + 1, inventoryState, roomsState)
+    lookAround newGameState
   else do 
      putStrLn "bzzz: ZLY KOD"
 --TODO Good code for level 2: 27508, po 3 probach skoncz gre z informacja o przegranej
@@ -161,7 +161,7 @@ command line gameState = do
             help gameState 
 
 gameOver :: GameState -> Bool
-gameOver gameState = first(gameState) == 2
+gameOver gameState = first(gameState) == 3
 
 game :: GameState -> IO()
 game gameState = do

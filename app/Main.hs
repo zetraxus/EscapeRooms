@@ -184,7 +184,7 @@ enterCode gameState code = do
       counters = fourth(gameState)
       triesLeftCode = counters !! roomId
   if code == "27508" then do
-    putStrLn "bzzz: RAWIDLOWY KOD" 
+    putStrLn "bzzz: PRAWIDLOWY KOD" 
     let newGameState = (roomId + 1, inventoryState, roomsState, counters)
     lookAround newGameState
   else if triesLeftCode == 0 then do

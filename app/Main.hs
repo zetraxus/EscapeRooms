@@ -241,17 +241,29 @@ use4 gameState item roomObject = do
   else do
     incorrectUsage gameState item roomObject
 
-use :: GameState -> String -> String -> IO()
-use gameState item roomObject = do
+use2Items :: GameState -> String -> String -> IO()
+use2Items gameState item roomObject = do
   let roomId = first gameState
       inventoryState = second gameState
-
   if isOnList item inventoryState then do
     case roomId of
       0 -> use0 gameState item roomObject
       3 -> use3 gameState item roomObject
       4 -> use4 gameState item roomObject
       _ -> incorrectUsage gameState item roomObject
+  else do
+    let output = "Nie posiadasz przedmiotu " ++ item
+    putStrLn output
+    game gameState
+
+use :: GameState -> String -> IO()
+use gameState item = do
+  let roomId = first gameState
+      inventoryState = second gameState
+  if isOnList item inventoryState then do
+    if (roomId == 2) then do
+      putStrLn "PRZEKLADNIE"
+    else incorrectUsage gameState item ""
   else do
     let output = "Nie posiadasz przedmiotu " ++ item
     putStrLn output
@@ -337,7 +349,7 @@ command line gameState = do
       "rozgladam" -> if length line == 1 || (length line == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
       "podnosze" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
       "czytam" -> if length line == 2 then readNote gameState (line !! 1) else wrongCommand gameState
-      "uzywam" -> use gameState (line !! 1) (line !! 2)
+      "uzywam" -> if length line == 2 then use gameState (line !! 1) else if length line == 3 then use2Items gameState (line !! 1) (line !! 2) else wrongCommand gameState
       "lacze" -> if length line == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
       "przegladam" -> if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
       "wpisuje" -> if length line == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState

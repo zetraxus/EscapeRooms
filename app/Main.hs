@@ -10,7 +10,7 @@ type GameState = (Int, [String], [[String]], [Int], [Int]) -- (nr pokoju, invent
 
 initialGameState :: GameState
 
-initialGameState = (2, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0], [0, 0, 0]) --TODO change inital state to 0
+initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0], [0, 0, 0])
 
 first :: (a, b, c, d, e) -> a
 first (a, _, _, _, _) = a
@@ -127,7 +127,7 @@ lookAround3 gameState = do
 
 lookAround4 :: GameState -> IO() --TODO not modular not implemented
 lookAround4 gameState = do
-  let output = "Po odblokowaniu drzwi pedzisz dalej co sil w nogach, by tylko nabrac do pluc swiezego\npowietrza. Niestety, gdy opuszczasz kleby dymu, do Twoich nozdrzy dociera okropny\nsmrod. Dookola panuje mrok. Nie jestes w stanie wytrzymac odoru i zwracasz swoje\nsniadanie wprost przed siebie. Po chwili decydujesz sie przejsc po omacku dalej,\nale Twoja noga trafia na cos miekkiego. Gdy twoj wzrok przyzwyczaja sie do ciemnosci,\nzauwazasz, ze nadepnales na cialo 50 letniego mezczyzny w stanie rozkladu. Kucasz,\nby mu sie przyjrzec, lecz nie zauwazasz nic nadzwyczajnego. Podnosisz glowe i w oddali\nzauwazasz ledwo swiecacy ekran. Gdy sie do niego zblizasz, odczytujesz, ze jest to\nczytnik linii papilarnych, do ktorego przykladasz dlon - niestety na ekranie pojawia\nsie komunikat \"brak dostepu\". Stojac wciaz w tym samym miejscu i powstrzymujac odruchy\nwymiotne, wytezasz wzrok i w przeciwleglym rogu dostrzegasz kontury narzedzi stolarskich:\npile mechaniczna, siekiere, papier scierny i roznego rodzaju pilniki."
+  let output = "Po odblokowaniu drzwi pedzisz do kolejnego pomieszczenia. Ponownie tak jak i wcześniej, drzwi za Tobą zatrzaskują się. W następnym pokoju na przeciwległej ścianie drzwi oraz świecący ekran. Gdy sie do niego zblizasz, odczytujesz, ze jest to czytnik linii papilarnych, do którego przykładasz dłoń - niestety na ekranie pojawia się komunikat \"brak dostepu\". Rozglądasz się uważniej po pokoju i widzisz mnóstwo elementów wskazujących na to, iż był to jakiś warsztat. Na stole znajdują się narzedza stolarskie:\npila mechaniczna, siekiera, papier scierny i roznego rodzaju pilniki. Na ścianach znajduje się wiele obrazów pewnego mężczyzny, a w kącie wiele ukończonych i nieukończonych wynalazków. Przyglądasz im się uważnie i dostrzegasz fascynację wynalazcy anatomią. Być może eksperymentował nad stworzeniem nowej protezy lub egzoszkieletu. Po dłuższej chwili obserwujesz w drugim rogu pokoju krzesło, na którym znajduje się coś na kształt człowieka, to chyba kolejny eksperyment! Przyglądasz się mu dokładniej i widzisz bardzo precyzyjnie wykonaną twarz i dłonie, które wyglądają jak u żywego człowieka."
   putStrLn output
   game gameState
 
@@ -365,6 +365,25 @@ wrongCommand gameState = do
   putStrLn "Bledna komenda!"
   help gameState
 
+dropItem :: GameState -> String -> IO()
+dropItem gameState item = do
+  let roomId = first gameState
+      inventoryState = second gameState
+      roomsState = third gameState
+      currentRoomState = roomsState !! roomId
+
+  if isOnList item inventoryState then do --check if on the list
+    let newInventory = removeFromList item inventoryState --remove item currentRoom
+        newRoomState = currentRoomState ++ [item]
+        newRoomsState = replaceNth roomId newRoomState roomsState
+        newGameState = (roomId, newInventory, newRoomsState, fourth gameState, fifth gameState) --update gameState
+        output = "Upuszczasz " ++ item
+    putStrLn output
+    game newGameState
+   else do
+    putStrLn "nie masz przedmiotu o takiej nazwie w ekwipunku"
+    game gameState
+
 command :: [String] -> GameState -> IO ()
 command line gameState = do
   if length line > 3 then wrongCommand gameState
@@ -373,6 +392,7 @@ command line gameState = do
     case cmd of
       "rozgladam" -> if length line == 1 || (length line == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
       "podnosze" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
+      "upuszczam" -> if length line == 2 then dropItem gameState (line !! 1) else wrongCommand gameState -- TODO add to help
       "czytam" -> if length line == 2 then readNote gameState (line !! 1) else wrongCommand gameState
       "uzywam" -> if length line == 2 then use gameState (line !! 1) else if length line == 3 then use2Items gameState (line !! 1) (line !! 2) else wrongCommand gameState
       "lacze" -> if length line == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState

@@ -12,6 +12,7 @@ initialGameState :: GameState
 
 initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier"], ["drut", "blaszka"], ["piła", "siekiera", "papier-ścierny", "ciało"], ["xd"]], [0, 2, 0, 0, 0, 0], [0, 0, 0]) --TODO change inital state to 0
 
+
 first :: (a, b, c, d, e) -> a
 first (a, _, _, _, _) = a
 
@@ -128,6 +129,7 @@ lookAround3 gameState = do
 lookAround4 :: GameState -> IO() --TODO not modular not implemented
 lookAround4 gameState = do
   let output = "Po odblokowaniu drzwi pędzisz do kolejnego pomieszczenia. Ponownie, tak jak\ni wcześniej, drzwi za Tobą zatrzaskują się. W następnym pokoju na przeciwległej\nścianie widzisz drzwi oraz świecący ekran. Gdy się do niego zbliżasz, odczytujesz,\nże jest to czytnik linii papilarnych, do którego przykładasz dłoń - niestety,\nna ekranie pojawia się komunikat \"brak dostępu\". Rozglądasz się uważniej\npo pomieszczeniu i widzisz mnóstwo elementów wskazujących na to, iż był to jakiś\nwarsztat. Na stole znajdują się narzędzia stolarskie: piła mechaniczna, siekiera,\npapier ścierny i różnego rodzaju pilniki. Na ścianach znajdują się obrazy pewnego\nmężczyzny, a w kącie wiele ukończonych i nieukończonych wynalazków. Przyglądasz\nim się uważnie i dostrzegasz fascynację wynalazcy anatomią. Być może eksperymentował\nnad stworzeniem nowej protezy lub egzoszkieletu. Po dłuższej chwili obserwujesz\nw drugim rogu pokoju krzesło, na którym znajduje się coś na kształt człowieka,\nto chyba kolejny eksperyment! Przyglądasz się mu dokładniej i widzisz bardzo\nprecyzyjnie wykonaną twarz i dłonie, które wyglądają jak u żywego człowieka."
+
   putStrLn output
   game gameState
 
@@ -373,12 +375,32 @@ wrongCommand gameState = do
   putStrLn "Błędna komenda!"
   help gameState
 
+dropItem :: GameState -> String -> IO()
+dropItem gameState item = do
+  let roomId = first gameState
+      inventoryState = second gameState
+      roomsState = third gameState
+      currentRoomState = roomsState !! roomId
+
+  if isOnList item inventoryState then do --check if on the list
+    let newInventory = removeFromList item inventoryState --remove item currentRoom
+        newRoomState = currentRoomState ++ [item]
+        newRoomsState = replaceNth roomId newRoomState roomsState
+        newGameState = (roomId, newInventory, newRoomsState, fourth gameState, fifth gameState) --update gameState
+        output = "Upuszczasz " ++ item
+    putStrLn output
+    game newGameState
+   else do
+    putStrLn "nie masz przedmiotu o takiej nazwie w ekwipunku"
+    game gameState
+
 command :: [String] -> GameState -> IO ()
 command line gameState = do
   if length line > 3 then wrongCommand gameState
   else do
     let cmd = head line
     case cmd of
+      "upuszczam" -> if length line == 2 then dropItem gameState (line !! 1) else wrongCommand gameState -- TODO add to help
       "rozglądam" -> if length line == 1 || (length line == 2 && (line !! 1) == "się") then lookAround gameState else wrongCommand gameState
       "podnoszę" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
       "czytam" -> if length line == 2 then readNote gameState (line !! 1) else wrongCommand gameState

@@ -256,18 +256,56 @@ use2Items gameState item roomObject = do
     putStrLn output
     game gameState
 
+-- niebieski czerwony zielony
 use :: GameState -> String -> IO()
 use gameState item = do
   let roomId = first gameState
-      inventoryState = second gameState
-  if isOnList item inventoryState then do
-    if (roomId == 2) then do
-      putStrLn "PRZEKLADNIE"
+      sequence = fifth gameState
+  if roomId == 2 then do
+    if item == "cz" then do
+      if sequence !! 0 > 0 then do
+        game gameState
+      else do
+        if sequence == [0, 1, 0] then do
+          putStrLn "ekstra"
+          game (first gameState, second gameState, third gameState, fourth gameState, [1, 1, 0])  
+        else do
+          let newSequence = replaceNth 0 2 sequence
+          if isOnList 0 newSequence then
+            game (first gameState, second gameState, third gameState, fourth gameState, newSequence)  
+          else do
+            putStrLn "przegranko"
+            game (first gameState, second gameState, third gameState, fourth gameState, [0, 0, 0])  
+    else if item == "ni" then do
+      if sequence !! 1 > 0 then do
+        game gameState
+      else do 
+        if sequence == [0, 0, 0] then do
+          putStrLn "ekstra"
+          game (first gameState, second gameState, third gameState, fourth gameState, [0, 1, 0])  
+        else do
+          let newSequence = replaceNth 1 2 sequence
+          if isOnList 0 newSequence then
+            game (first gameState, second gameState, third gameState, fourth gameState, newSequence)  
+          else do
+            putStrLn "przegranko"
+            game (first gameState, second gameState, third gameState, fourth gameState, [0, 0, 0])  
+    else if item == "zi" then do
+      if sequence !! 2 > 0 then do
+        game gameState
+      else do      
+        if sequence == [1, 1, 0] then do
+          putStrLn "udalo sie wszystko"
+          game (first gameState, second gameState, third gameState, fourth gameState, [0, 0, 0])  -- todo set 1, 1, 1
+        else do
+          let newSequence = replaceNth 2 2 sequence
+          if isOnList 0 newSequence then
+            game (first gameState, second gameState, third gameState, fourth gameState, newSequence)  
+          else do
+            putStrLn "przegranko"
+            game (first gameState, second gameState, third gameState, fourth gameState, [0, 0, 0])  
     else incorrectUsage gameState item ""
-  else do
-    let output = "Nie posiadasz przedmiotu " ++ item
-    putStrLn output
-    game gameState
+  else incorrectUsage gameState item ""
 
 craft :: GameState -> String -> String -> IO()
 craft gameState item1 item2 = do
@@ -362,8 +400,10 @@ gameOver gameState = first gameState == 5
 
 game :: GameState -> IO()
 game gameState = do
+    let seq = fifth gameState
     if gameOver gameState then putStrLn "Koniec gry!"
     else do
+      print seq
       line <- getInputLine "Co robisz?";
       let tokenizedLine = tokenize line
       command tokenizedLine gameState

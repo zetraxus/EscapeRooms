@@ -10,7 +10,7 @@ type GameState = (Int, [String], [[String]], [Int], [Int]) -- (nr pokoju, invent
 
 initialGameState :: GameState
 
-initialGameState = (2, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0], [0, 0, 0]) --TODO change inital state to 0
+initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier"], ["drut", "blaszka"], ["piła", "siekiera", "papier-ścierny", "ciało"], ["xd"]], [0, 2, 0, 0, 0, 0], [0, 0, 0]) --TODO change inital state to 0
 
 first :: (a, b, c, d, e) -> a
 first (a, _, _, _, _) = a
@@ -76,14 +76,14 @@ lookAround gameState = do
     3 -> lookAround3 gameState
     4 -> lookAround4 gameState
     5 -> lookAround5 gameState
-    _ -> do putStrLn "Pokoj nie istnieje"
+    _ -> do putStrLn "Pokój nie istnieje"
 
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
   let roomId = first gameState
       roomState = third gameState !! roomId
-      outputPart1 = "Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi."
-      outputPart2 = " Podchodzisz... Na stole lezy klucz."
+      outputPart1 = "Ocknąłeś się. Leżysz na podłodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na ścianie przed Tobą widnieje\nnamazany czerwoną substacją napis: \"Nie ma ratunku!\". W pokoju znajduje się jeszcze\nstolik oraz wielkie czerwone drzwi."
+      outputPart2 = " Podchodzisz bliżej... Na stole leży klucz."
   if isOnList "klucz" roomState then do
     let outputModified = outputPart1 ++ outputPart2
     putStrLn outputModified
@@ -95,10 +95,10 @@ lookAround1 :: GameState -> IO()
 lookAround1 gameState = do
   let roomId = first gameState
       roomState = third gameState !! roomId
-      outputPart1 = "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet\nTwojego poprzednika, ktoremu nie udalo sie uciec."
-      outputPart2 = " Szkielet trzyma w rece jakies\nzawiniatko - chyba jest to jakis list."
-      outputPart3 = " Dodatkowo widzisz jeszcze stolik, na ktorym\nlezy notatka."
-      outputPart4 = " Kolejne drzwi sa zamkniete jednak zamiast tradycyjnego klucza potrzebujesz wpisac kod."
+      outputPart1 = "Przechodzisz do drugiego pokoju, a za sobą słyszysz dźwięk zamykających się drzwi.\nNa podłodze leży szkielet. Prawdopodobnie jest to truchło Twojego poprzednika,\nktóremu nie udało się uciec."
+      outputPart2 = " Kościana ręka trzyma jakieś zawiniątko - wygląda to\nna jakiś list."
+      outputPart3 = " Dodatkowo widzisz jeszcze stolik, na którym leży notatka."
+      outputPart4 = "\nKolejne drzwi są zamknięte, jednak zamiast tradycyjnego klucza potrzebujesz wpisać kod."
   if isOnList "list" roomState && isOnList "notatka" roomState then do
     let outputModified = outputPart1 ++ outputPart2 ++ outputPart3 ++ outputPart4
     putStrLn outputModified
@@ -115,19 +115,19 @@ lookAround1 gameState = do
 
 lookAround2 :: GameState -> IO() --TODO not modular not implemented
 lookAround2 gameState = do
-  let output = "Wchodzisz do kolejnego pokoju. Po Twojej lewej stronie stoi regal pelen ksiazek,\nzas z prawej widzisz dziwny panel z trzema otworami. Pod regalem znajduje sie\nsterta brudnych ubran, a posrod nich mozna rowniez zobaczyc dlugopis bez skuwki,\nzgnieciony papier, paczke zapalek i kilka drobnych monet. W rogu pokoju stoi worek\nz trzema kolorowymi przekladniami - niebieska, zielona i czerwona."
+  let output = "Wchodzisz do kolejnego pokoju - droga powrotu jest zablokowana. Po Twojej lewej\nstronie stoi regał pełen książek, zaś z prawej widzisz zestaw trzech kolorowych\ndźwigni - niebieską, zieloną i czerwoną. Pod regałem znajduje się sterta\nbrudnych ubrań, a pośród nich można również zobaczyć długopis bez skuwki,\nzgnieciony papier, paczkę zapałek i kilka drobnych monet."
   putStrLn output
   game gameState
 
 lookAround3 :: GameState -> IO() --TODO not modular not implemented
 lookAround3 gameState = do
-  let output = "W nastepnym pomieszczeniu nic nie widac. Wszedzie unosi sie dym. Jednak nie masz wyjscia,\nwchodzisz do pomieszczenia zaslaniajac usta i nos rekami. Drzwi zatrzaskuja sie za Toba.\nPo omacku badasz pomieszczenie. Na podlodze lezy kawalek drutu, blaszka, butelka z woda\ni recznik. Moczysz recznik woda i tworzysz z niego cos w rodzaju maski. Teraz mozesz\neksplorowac dalej. Znajdujesz drzwi. Nie ma zamka, zamiast niego natrafiasz na stara klodke."
+  let output = "W następnym pomieszczeniu nic nie widać. Wszędzie unosi sie dym. Jednak, po zatrzaśnięciu\npoprzednich drzwi, nie masz wyjścia, wchodzisz do pomieszczenia zasłaniając usta i nos\nrękami. Drzwi zatrzaskują się za Tobą. Po omacku badasz pomieszczenie. Na podłodze leży\nkawałek drutu, blaszka, butelka z wodą i ręcznik. Moczysz ręcznik wodą i tworzysz z niego\ncoś w rodzaju maski. Teraz możesz eksplorować dalej. Znajdujesz drzwi. Nie ma zamka,\nzamiast niego natrafiasz na starą kłódkę."
   putStrLn output
   game gameState
 
 lookAround4 :: GameState -> IO() --TODO not modular not implemented
 lookAround4 gameState = do
-  let output = "Po odblokowaniu drzwi pedzisz dalej co sil w nogach, by tylko nabrac do pluc swiezego\npowietrza. Niestety, gdy opuszczasz kleby dymu, do Twoich nozdrzy dociera okropny\nsmrod. Dookola panuje mrok. Nie jestes w stanie wytrzymac odoru i zwracasz swoje\nsniadanie wprost przed siebie. Po chwili decydujesz sie przejsc po omacku dalej,\nale Twoja noga trafia na cos miekkiego. Gdy twoj wzrok przyzwyczaja sie do ciemnosci,\nzauwazasz, ze nadepnales na cialo 50 letniego mezczyzny w stanie rozkladu. Kucasz,\nby mu sie przyjrzec, lecz nie zauwazasz nic nadzwyczajnego. Podnosisz glowe i w oddali\nzauwazasz ledwo swiecacy ekran. Gdy sie do niego zblizasz, odczytujesz, ze jest to\nczytnik linii papilarnych, do ktorego przykladasz dlon - niestety na ekranie pojawia\nsie komunikat \"brak dostepu\". Stojac wciaz w tym samym miejscu i powstrzymujac odruchy\nwymiotne, wytezasz wzrok i w przeciwleglym rogu dostrzegasz kontury narzedzi stolarskich:\npile mechaniczna, siekiere, papier scierny i roznego rodzaju pilniki."
+  let output = "Po odblokowaniu drzwi pędzisz do kolejnego pomieszczenia. Ponownie, tak jak\ni wcześniej, drzwi za Tobą zatrzaskują się. W następnym pokoju na przeciwległej\nścianie widzisz drzwi oraz świecący ekran. Gdy się do niego zbliżasz, odczytujesz,\nże jest to czytnik linii papilarnych, do którego przykładasz dłoń - niestety,\nna ekranie pojawia się komunikat \"brak dostępu\". Rozglądasz się uważniej\npo pomieszczeniu i widzisz mnóstwo elementów wskazujących na to, iż był to jakiś\nwarsztat. Na stole znajdują się narzędzia stolarskie: piła mechaniczna, siekiera,\npapier ścierny i różnego rodzaju pilniki. Na ścianach znajdują się obrazy pewnego\nmężczyzny, a w kącie wiele ukończonych i nieukończonych wynalazków. Przyglądasz\nim się uważnie i dostrzegasz fascynację wynalazcy anatomią. Być może eksperymentował\nnad stworzeniem nowej protezy lub egzoszkieletu. Po dłuższej chwili obserwujesz\nw drugim rogu pokoju krzesło, na którym znajduje się coś na kształt człowieka,\nto chyba kolejny eksperyment! Przyglądasz się mu dokładniej i widzisz bardzo\nprecyzyjnie wykonaną twarz i dłonie, które wyglądają jak u żywego człowieka."
   putStrLn output
   game gameState
 
@@ -139,8 +139,7 @@ lookAround5 gameState = do
 
 addElementToEq :: [String] -> String -> [String]
 addElementToEq inventoryState item = do
-  if item == "worek" then do inventoryState ++ ["czerwona-przekladnia", "niebieska-przekladnia", "zielona-przekladnia"]
-    else do inventoryState ++ [item]
+  inventoryState ++ [item]
 
 addElementToRoom :: [String] -> String -> [String]
 addElementToRoom roomState item = do
@@ -155,8 +154,8 @@ pickUp gameState item = do
       currentRoomState = roomsState !! roomId
 
   if isOnList item currentRoomState then do --check if on the list
-    if item == "cialo" || item == "cialo-bez-reki" then do
-      putStrLn "Nie mozna podniesc ciala - jest za ciezkie."
+    if item == "ciało" || item == "ciało-bez-reki" then do
+      putStrLn "Nie można podnieść ciała - jest za ciężkie."
       game gameState
       else do
         let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
@@ -177,16 +176,24 @@ readNote gameState item = do
       inventoryState = second gameState
   if isOnList item inventoryState then do
     if item == "list" then do
-      putStrLn "Witaj podrozniku!\nJesli czytasz ten list prawdopodobnie jestes w takiej samej sytuacji jak ja teraz. Notatka jest zdradliwa, aby otworzyc drzwi musisz podac prawidlowy kod, jednak notatka nie precyzuje dokladnie jaki jest kod. Niestety po 3 probie wpisanie kodu mechanizm zablokowal sie, a na wyswietlaczu pojawil sie licznik. Po kilku dniach zorientowalem sie, ze licznik pokazuje liczbe dni do jakiegos wydarzenia. (Byc moze do oblokowania mechanizmu) Zostaly mi jeszcze 83 dni. Jesli to czytasz chcialbym Cie poinformowac, ze poczatkowe liczby pierwsze, ktore wyznaczylem do obliczenia kodu to 11, 13 i 29. Niestety zadna z nich nie jest prawidlowa.\nSprawdz inne liczby. Moze Ci sie uda.\nPowodzenia!"
+      putStrLn "Witaj podróżniku!\nJeśli czytasz ten list, prawdopodobnie jesteś w takiej samej sytuacji jak ja teraz."
+      putStrLn "Notatka jest zdradliwa, aby otworzyć drzwi, musisz podać prawidłowy kod, jednak notatka nie precyzuje"
+      putStrLn "dokładnie jaki jest kod. Niestety, po trzeciej próbie wpisania kodu, mechanizm zablokował się, a na"
+      putStrLn "wyświetlaczu pojawił się licznik. Po kilku dniach zorientowałem się, że licznik pokazuje liczbę dni"
+      putStrLn "do jakiegoś wydarzenia (być może do oblokowania mechanizmu). Zostały mi jeszcze 83 dni. Jeśli to czytasz,"
+      putStrLn "chciałbym Cię poinformować, że początkowe liczby pierwsze, które wyznaczyłem do obliczenia kodu to: 11, 13"
+      putStrLn "i 29. Niestety, żadna z nich nie jest prawidłowa. Sprawdź inne liczby. Może Ci się uda.\nPowodzenia!"
       game gameState
     else if item == "notatka" then do
-      putStrLn "Wez liczbe pierwsza pomiedzy 10 a 30, podnies ja do kwadratu, a nastepnie pomnoz przez liczbe pelnych tygodni w kazdym roku."
+      putStrLn "Weź liczbę pierwszą pomiędzy 10 a 30, podnieś ją do kwadratu, a następnie pomnóż przez liczbę pełnych"
+      putStrLn "tygodni w każdym roku."
       game gameState
     else if roomId == 2 && item == "papier" then do
-      putStrLn "Tam, gdzie pod szafirowym niebem\nrubinowe pola kwiatow kwitna\nlaka sie mieni, jakby szmaragd wielki,\nkuszac strudzonych, by przycuplneli"
+      putStrLn "Tam, gdzie pod szafirowym niebem\nrubinowe pola kwiatów kwitną\nłąka sie mieni, jakby szmaragd wielki,"
+      putStrLn "kusząc strudzonych, by przycupnęli"
       game gameState
     else do
-      let output = "Nie mozesz przeczytac " ++ item
+      let output = "Nie możesz przeczytać " ++ item
       putStrLn output
       game gameState
   else do
@@ -196,7 +203,7 @@ readNote gameState item = do
     
 incorrectUsage :: GameState -> String -> String -> IO()
 incorrectUsage gameState item roomObject = do
-  let output = "Nie mozna uzyc " ++ item ++ " z obiektem " ++ roomObject
+  let output = "Nie można użyć " ++ item ++ " z obiektem " ++ roomObject
   putStrLn output
   game gameState
 
@@ -228,15 +235,15 @@ use4 gameState item roomObject = do
       roomsState = third gameState
       counters = fourth gameState
       currentRoomState = roomsState !! 4
-  if item == "pila" || item == "siekiera" && roomObject == "cialo" then do
+  if item == "piła" || item == "siekiera" && roomObject == "ciało" then do
     let newCurrentRoomState = removeFromList roomObject currentRoomState --remove roomObject currentRoom
-        newCurrentRoomState2 = addElementToRoom newCurrentRoomState "cialo-bez-reki"
-        newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "reka"
+        newCurrentRoomState2 = addElementToRoom newCurrentRoomState "ciało-bez-ręki"
+        newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "ręka"
         newRoomsState = replaceNth 4 newCurrentRoomState3 roomsState --update roomsState
         newGameState = (4, inventoryState, newRoomsState, counters, fifth gameState)
-    putStrLn "Odciales reke od ciala"
+    putStrLn "Odciąłeś rękę od ciała"
     game newGameState
-  else if item == "reka" && roomObject == "czytnik" then do
+  else if item == "ręka" && roomObject == "czytnik" then do
     let newInventoryState = removeFromList item inventoryState
         newGameState = (5, newInventoryState, roomsState, counters, fifth gameState)
     lookAround newGameState
@@ -269,7 +276,7 @@ compareSequences gameState sequence leverIndex correctSequence = do
       let newSequence = replaceNth leverIndex 1 sequence
       if newSequence == [1, 1, 1] then do
         putStrLn "Była to poprawna sekwencja. Powoli otwierają się drzwi do kolejnego pomieszczenia!"
-        game (first gameState + 1, second gameState, third gameState, fourth gameState, fifth gameState)
+        lookAround (first gameState + 1, second gameState, third gameState, fourth gameState, fifth gameState)
       else do
         game (first gameState, second gameState, third gameState, fourth gameState, newSequence)
     else do
@@ -306,12 +313,12 @@ craft gameState item1 item2 = do
           newInventoryState2 = removeFromList item2 newInventoryState
           newInventoryState3 = newInventoryState2 ++ ["wytrych"]
           newGameState = (roomId, newInventoryState3, roomsState, counters, fifth gameState)
-      putStrLn "Zrobiles wytrych"
+      putStrLn "Zrobiłes wytrych"
       game newGameState
 --    else if roomId == 1 && item == "xd" && roomObject == "xd2" then do
 --      game gameState
     else do
-      let output = "Nie mozna polaczyc " ++ item1 ++ " z " ++ item2
+      let output = "Nie mozna połączyć " ++ item1 ++ " z " ++ item2
       putStrLn output
       game gameState
   else do
@@ -333,17 +340,17 @@ enterCode gameState code = do
       counters = fourth gameState
       triesLeftCode = counters !! roomId
   if code == "27508" then do
-    putStrLn "bzzz: PRAWIDLOWY KOD" 
+    putStrLn "bzzz: PRAWIDŁOWY KOD"
     let newGameState = (roomId + 1, inventoryState, roomsState, counters, fifth gameState)
     lookAround newGameState
   else if triesLeftCode == 0 then do
-    putStrLn "bzzz: ZLY KOD"
+    putStrLn "bzzz: ZŁY KOD"
     putStrLn "52"
-    putStrLn "Koniec gry: Umarles z glodu!"
+    putStrLn "Koniec gry: Umarłeś z głodu!"
   else do
     let newCounters = incrementCounter (-1) roomId counters
         newGameState = (roomId, inventoryState, roomsState, newCounters, fifth gameState) --update gameState
-    putStrLn "bzzz: ZLY KOD"
+    putStrLn "bzzz: ZŁY KOD"
     game newGameState
     
 incrementCounter :: Int -> Int -> [Int] -> [Int]
@@ -356,13 +363,14 @@ help :: GameState -> IO()
 help gameState = do
   putStrLn "=============="
   putStrLn "Dostepne komendy:"
-  putStrLn "- rozejrzyj sie\n- podnies <przedmiot>\n- przeczytaj <przedmiot>\n- uzyj\n- polacz <przedmiot 1> <przedmiot 2>\n- przegladaj ekwipunek\n- wpisz kod <kod>\n- pomocy\n- koniec"
+  putStrLn "- rozejrzyj się\n- podnieś <przedmiot>\n- przeczytaj <przedmiot>\n- użyj\n- połącz <przedmiot 1> <przedmiot 2>"
+  putStrLn "- przeglądaj ekwipunek\n- wpisz kod <kod>\n- pomocy\n- koniec"
   putStrLn "=============="
   game gameState
 
 wrongCommand :: GameState -> IO()
 wrongCommand gameState = do
-  putStrLn "Bledna komenda!"
+  putStrLn "Błędna komenda!"
   help gameState
 
 command :: [String] -> GameState -> IO ()
@@ -371,13 +379,13 @@ command line gameState = do
   else do
     let cmd = head line
     case cmd of
-      "rozgladam" -> if length line == 1 || (length line == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
-      "podnosze" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
+      "rozglądam" -> if length line == 1 || (length line == 2 && (line !! 1) == "się") then lookAround gameState else wrongCommand gameState
+      "podnoszę" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
       "czytam" -> if length line == 2 then readNote gameState (line !! 1) else wrongCommand gameState
-      "uzywam" -> if length line == 2 then use gameState (line !! 1) else if length line == 3 then use2Items gameState (line !! 1) (line !! 2) else wrongCommand gameState
-      "lacze" -> if length line == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
-      "przegladam" -> if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
-      "wpisuje" -> if length line == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState
+      "używam" -> if length line == 2 then use gameState (line !! 1) else if length line == 3 then use2Items gameState (line !! 1) (line !! 2) else wrongCommand gameState
+      "łączę" -> if length line == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
+      "przeglądam" -> if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
+      "wpisuję" -> if length line == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState
       "pomocy" -> help gameState
       "koniec" -> exitSuccess
       _ -> do wrongCommand gameState

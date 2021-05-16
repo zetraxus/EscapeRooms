@@ -11,20 +11,24 @@ type GameState = (Int, [String], [[String]], [Int], [Int]) -- (nr pokoju, invent
 initialGameState :: GameState
 initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier"], ["drut", "blaszka"], ["piła", "siekiera", "papier-ścierny", "ciało"]], [0, 2, 0, 0, 0], [0, 0, 0])
 
-first :: (a, b, c, d, e) -> a
-first (a, _, _, _, _) = a
+getRoomId :: GameState -> Int
+getRoomId (a, _, _, _, _) = a
 
-second :: (a, b, c, d, e) -> b
-second (_, b, _, _, _) = b
+getInventory :: GameState -> [String]
+getInventory (_, b, _, _, _) = b
 
-third :: (a, b, c, d, e) -> c
-third (_, _, c, _, _) = c
+getRoomsStates :: GameState -> [[String]]
+getRoomsStates (_, _, c, _, _) = c
 
-fourth :: (a, b, c, d, e) -> d
-fourth (_, _, _, d, _) = d
+getCounters :: GameState -> [Int]
+getCounters (_, _, _, d, _) = d
   
-fifth :: (a, b, c, d, e) -> e
-fifth (_, _, _, _, e) = e
+getSequence :: GameState -> [Int]
+getSequence (_, _, _, _, e) = e
+
+getItemsInCurrentRoom :: GameState -> [String]
+getItemsInCurrentRoom gameState =
+  getRoomsStates gameState !! getRoomId gameState
 
 removeFromList :: Eq a => a -> [a] -> [a]
 removeFromList _ [] = []
@@ -34,7 +38,7 @@ removeFromList x (y:ys) | x == y = ys
 replaceNthElement :: Int -> a -> [a] -> [a]
 replaceNthElement _ _ [] = []
 replaceNthElement n newVal (x:xs) | n == 0 = newVal:xs
-                           | otherwise = x:replaceNthElement (n-1) newVal xs
+                                  | otherwise = x:replaceNthElement (n-1) newVal xs
                            
 isOnList :: Eq a => a -> [a] -> Bool
 isOnList _ [] = False 
@@ -49,16 +53,16 @@ getInputLine prompt = do
 
 printGameState :: GameState -> IO()
 printGameState gameState = do
-  print (first gameState)
-  print (second gameState)
-  print (third gameState !! first gameState)
-  print (fourth gameState)
-  print (fifth gameState)
+  print (getRoomId gameState)
+  print (getInventory gameState)
+  print (getRoomsStates gameState !! getRoomId gameState)
+  print (getCounters gameState)
+  print (getSequence gameState)
   putStrLn "=============="
 
 lookAround :: GameState -> IO()
 lookAround gameState = do
-  case first gameState of
+  case getRoomId gameState of
     0 -> lookAround0 gameState
     1 -> lookAround1 gameState
     2 -> lookAround2 gameState
@@ -68,11 +72,9 @@ lookAround gameState = do
 
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
-  let roomId = first gameState
-      roomState = third gameState !! roomId
-      outputPart1 = "Ocknąłeś się. Leżysz na podłodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na ścianie przed Tobą widnieje\nnamazany czerwoną substacją napis: \"Nie ma ratunku!\". W pokoju znajduje się jeszcze\nstolik oraz wielkie czerwone drzwi."
+  let outputPart1 = "Ocknąłeś się. Leżysz na podłodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na ścianie przed Tobą widnieje\nnamazany czerwoną substacją napis: \"Nie ma ratunku!\". W pokoju znajduje się jeszcze\nstolik oraz wielkie czerwone drzwi."
       outputPart2 = " Podchodzisz bliżej... Na stole leży klucz."
-  if isOnList "klucz" roomState then
+  if isOnList "klucz" (getItemsInCurrentRoom gameState) then
     putStrLn (outputPart1 ++ outputPart2)
   else
     putStrLn outputPart1
@@ -80,17 +82,16 @@ lookAround0 gameState = do
 
 lookAround1 :: GameState -> IO()
 lookAround1 gameState = do
-  let roomId = first gameState
-      roomState = third gameState !! roomId
+  let roomItems = getItemsInCurrentRoom gameState
       outputPart1 = "Przechodzisz do drugiego pokoju, a za sobą słyszysz dźwięk zamykających się drzwi.\nNa podłodze leży szkielet. Prawdopodobnie jest to truchło Twojego poprzednika,\nktóremu nie udało się uciec."
       outputPart2 = " Kościana ręka trzyma jakieś zawiniątko - wygląda to\nna jakiś list."
       outputPart3 = " Dodatkowo widzisz jeszcze stolik, na którym leży notatka."
       outputPart4 = "\nKolejne drzwi są zamknięte, jednak zamiast tradycyjnego klucza potrzebujesz wpisać kod."
-  if isOnList "list" roomState && isOnList "notatka" roomState then do
+  if isOnList "list" roomItems && isOnList "notatka" roomItems then do
     putStrLn (outputPart1 ++ outputPart2 ++ outputPart3 ++ outputPart4)
-  else if isOnList "notatka" roomState then do
+  else if isOnList "notatka" roomItems then do
     putStrLn (outputPart1 ++ outputPart3 ++ outputPart4)
-  else if isOnList "list" roomState then do
+  else if isOnList "list" roomItems then do
     putStrLn (outputPart1 ++ outputPart2 ++ outputPart4)
   else do
     putStrLn (outputPart1 ++ outputPart4)
@@ -116,29 +117,24 @@ lookAround4 gameState = do
 
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do
-  let roomId = first gameState
-      inventoryState = second gameState
-      roomsState = third gameState
-      currentRoomState = roomsState !! roomId
-
-  if isOnList item currentRoomState then do
+  if isOnList item (getItemsInCurrentRoom gameState) then do
     if item == "ciało" || item == "ciało-bez-reki" then do
       putStrLn "Nie można podnieść ciała - jest za ciężkie."
       game gameState
-      else do
-        let newCurrentRoomState = removeFromList item currentRoomState
-            newRoomsState = replaceNthElement roomId newCurrentRoomState roomsState
-            newInventoryState = item : inventoryState
-            newGameState = (first gameState, newInventoryState, newRoomsState, fourth gameState, fifth gameState)
-        putStrLn ("Podnosisz " ++ item)
-        game newGameState
+    else do
+      let newCurrentRoomState = removeFromList item (getItemsInCurrentRoom gameState)
+          newRoomsState = replaceNthElement (getRoomId gameState) newCurrentRoomState (getRoomsStates gameState)
+          newInventoryState = item : getInventory gameState
+          newGameState = (getRoomId gameState, newInventoryState, newRoomsState, getCounters gameState, getSequence gameState)
+      putStrLn ("Podnosisz " ++ item)
+      game newGameState
     else do
       putStrLn (item ++ " nie ma w pokoju")
       game gameState
 
 readNote :: GameState -> String -> IO()
 readNote gameState item = do
-  if isOnList item (second gameState) then do
+  if isOnList item (getInventory gameState) then do
     if item == "list" then do
       putStrLn "Witaj podróżniku!\nJeśli czytasz ten list, prawdopodobnie jesteś w takiej samej sytuacji jak ja teraz."
       putStrLn "Notatka jest zdradliwa, aby otworzyć drzwi, musisz podać prawidłowy kod, jednak notatka nie precyzuje"
@@ -171,45 +167,43 @@ incorrectUsage gameState item roomObject = do
 use0 :: GameState -> String -> String -> IO()
 use0 gameState item roomObject = do
   if item == "klucz" && roomObject == "drzwi" then do
-    let newInventoryState = removeFromList item (second gameState)
-        newGameState = (first gameState + 1, newInventoryState, third gameState, fourth gameState, fifth gameState)
+    let newInventoryState = removeFromList item (getInventory gameState)
+        newGameState = (getRoomId gameState + 1, newInventoryState, getRoomsStates gameState, getCounters gameState, getSequence gameState)
     lookAround newGameState
     else incorrectUsage gameState item roomObject
 
 use3 :: GameState -> String -> String -> IO()
 use3 gameState item roomObject = do
   if item == "wytrych" && roomObject == "drzwi" then do
-    let newInventoryState = removeFromList item (second gameState)
-        newGameState = (first gameState + 1, newInventoryState, third gameState, fourth gameState, fifth gameState)
+    let newInventoryState = removeFromList item (getInventory gameState)
+        newGameState = (getRoomId gameState + 1, newInventoryState, getRoomsStates gameState, getCounters gameState, getSequence gameState)
     lookAround newGameState
   else incorrectUsage gameState item roomObject
 
 use4 :: GameState -> String -> String -> IO()
 use4 gameState item roomObject = do
-  let roomId = first gameState
-      inventoryState = second gameState
-      roomsState = third gameState
+  let roomId = getRoomId gameState
+      inventoryState = getInventory gameState
+      roomsState = getRoomsStates gameState
       currentRoomState = roomsState !! roomId
   if item == "piła" || item == "siekiera" && roomObject == "ciało" then do
     let newCurrentRoomState = removeFromList roomObject currentRoomState
         newCurrentRoomState2 = "ciało-bez-ręki" : "ręka" : newCurrentRoomState
         newRoomsState = replaceNthElement roomId newCurrentRoomState2 roomsState
-        newGameState = (first gameState, inventoryState, newRoomsState, fourth gameState, fifth gameState)
+        newGameState = (getRoomId gameState, inventoryState, newRoomsState, getCounters gameState, getSequence gameState)
     putStrLn "Odciąłeś rękę od ciała"
     game newGameState
   else if item == "ręka" && roomObject == "czytnik" then do
     let newInventoryState = removeFromList item inventoryState
-        newGameState = (roomId + 1, newInventoryState, roomsState, fourth gameState, fifth gameState)
+        newGameState = (roomId + 1, newInventoryState, roomsState, getCounters gameState, getSequence gameState)
     lookAround newGameState
   else do
     incorrectUsage gameState item roomObject
 
 use2Items :: GameState -> String -> String -> IO()
 use2Items gameState item roomObject = do
-  let roomId = first gameState
-      inventoryState = second gameState
-  if isOnList item inventoryState then do
-    case roomId of
+  if isOnList item (getInventory gameState) then do
+    case getRoomId gameState of
       0 -> use0 gameState item roomObject
       3 -> use3 gameState item roomObject
       4 -> use4 gameState item roomObject
@@ -229,39 +223,37 @@ compareSequences gameState sequence leverIndex correctSequence = do
       let newSequence = replaceNthElement leverIndex 1 sequence
       if newSequence == [1, 1, 1] then do
         putStrLn "Była to poprawna sekwencja. Powoli otwierają się drzwi do kolejnego pomieszczenia!"
-        lookAround (first gameState + 1, second gameState, third gameState, fourth gameState, fifth gameState)
+        lookAround (getRoomId gameState + 1, getInventory gameState, getRoomsStates gameState, getCounters gameState, getSequence gameState)
       else do
-        game (first gameState, second gameState, third gameState, fourth gameState, newSequence)
+        game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, getCounters gameState, newSequence)
     else do
       let newSequence = replaceNthElement leverIndex 2 sequence
       if isOnList 0 newSequence then
-        game (first gameState, second gameState, third gameState, fourth gameState, newSequence)
+        game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, getCounters gameState, newSequence)
       else do
         putStrLn "Pociągnąłeś ostatnią dźwignię. Po chwili widzisz jak każda z nich wraca na początkową pozycję."
         putStrLn "Możesz spróbować ponownie."
-        game (first gameState, second gameState, third gameState, fourth gameState, [0, 0, 0])
+        game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, getCounters gameState, [0, 0, 0])
 
 use :: GameState -> String -> IO()
 use gameState item = do
-  let roomId = first gameState
-      sequence = fifth gameState
-  if roomId == 2 then do
+  if getRoomId gameState == 2 then do
     case item of
-      "czerwona-dźwignia" -> compareSequences gameState sequence 0 [0, 1, 0]
-      "niebieska-dźwignia" -> compareSequences gameState sequence 1 [0, 0, 0]
-      "zielona-dźwignia" -> compareSequences gameState sequence 2 [1, 1, 0]
+      "czerwona-dźwignia" -> compareSequences gameState (getSequence gameState) 0 [0, 1, 0]
+      "niebieska-dźwignia" -> compareSequences gameState (getSequence gameState) 1 [0, 0, 0]
+      "zielona-dźwignia" -> compareSequences gameState (getSequence gameState) 2 [1, 1, 0]
       _ -> incorrectUsage gameState item ""
   else incorrectUsage gameState item ""
 
 craft :: GameState -> String -> String -> IO()
 craft gameState item1 item2 = do
-  let inventoryState = second gameState
+  let inventoryState = getInventory gameState
   if isOnList item1 inventoryState && isOnList item2 inventoryState then do
     if (item1 == "drut" && item2 == "blaszka") || (item1 == "blaszka" && item2 == "drut") then do
       let newInventoryState = removeFromList item1 inventoryState
           newInventoryState2 = removeFromList item2 newInventoryState
           newInventoryState3 = "wytrych" : newInventoryState2
-          newGameState = (first gameState, newInventoryState3, third gameState, fourth gameState, fifth gameState)
+          newGameState = (getRoomId gameState, newInventoryState3, getRoomsStates gameState, getCounters gameState, getSequence gameState)
       putStrLn "Zrobiłes wytrych"
       game newGameState
     else do
@@ -273,23 +265,23 @@ craft gameState item1 item2 = do
 
 showInventory :: GameState -> IO()
 showInventory gameState = do
-  print (second gameState)
+  print (getInventory gameState)
   game gameState
 
 enterCode :: GameState -> String -> IO()
 enterCode gameState code = do
-  let roomId = first gameState
-      counters = fourth gameState
+  let roomId = getRoomId gameState
+      counters = getCounters gameState
       triesLeftCode = counters !! roomId
   if code == "27508" then do
     putStrLn "bzzz: PRAWIDŁOWY KOD"
-    lookAround (first gameState + 1, second gameState, third gameState, counters, fifth gameState)
+    lookAround (getRoomId gameState + 1, getInventory gameState, getRoomsStates gameState, counters, getSequence gameState)
   else if triesLeftCode == 0 then do
     putStrLn "bzzz: ZŁY KOD\n52\nKoniec gry: Umarłeś z głodu!"
   else do
     let newCounters = incrementCounter (-1) roomId counters
     putStrLn "bzzz: ZŁY KOD"
-    game (first gameState, second gameState, third gameState, newCounters, fifth gameState)
+    game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, newCounters, getSequence gameState)
     
 incrementCounter :: Int -> Int -> [Int] -> [Int]
 incrementCounter value roomId counters = do
@@ -313,18 +305,12 @@ wrongCommand gameState = do
 
 dropItem :: GameState -> String -> IO()
 dropItem gameState item = do
-  let roomId = first gameState
-      inventoryState = second gameState
-      roomsState = third gameState
-      currentRoomState = roomsState !! roomId
-
-  if isOnList item inventoryState then do --check if on the list
-    let newInventory = removeFromList item inventoryState --remove item currentRoom
-        newRoomState = item : currentRoomState
-        newRoomsState = replaceNthElement roomId newRoomState roomsState
-        newGameState = (roomId, newInventory, newRoomsState, fourth gameState, fifth gameState) --update gameState
+  if isOnList item (getInventory gameState) then do
+    let newInventory = removeFromList item (getInventory gameState)
+        newRoomState = item : getItemsInCurrentRoom gameState
+        newRoomsState = replaceNthElement (getRoomId gameState) newRoomState (getRoomsStates gameState)
     putStrLn ("Upuszczasz " ++ item)
-    game newGameState
+    game (getRoomId gameState, newInventory, newRoomsState, getCounters gameState, getSequence gameState)
    else do
     putStrLn "nie masz przedmiotu o takiej nazwie w ekwipunku"
     game gameState
@@ -333,8 +319,7 @@ command :: [String] -> GameState -> IO ()
 command line gameState = do
   if length line > 3 then wrongCommand gameState
   else do
-    let cmd = head line
-    case cmd of
+    case head line of
       "upuszczam" -> if length line == 2 then dropItem gameState (line !! 1) else wrongCommand gameState -- TODO add to help
       "rozglądam" -> if length line == 1 || (length line == 2 && (line !! 1) == "się") then lookAround gameState else wrongCommand gameState
       "podnoszę" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
@@ -348,7 +333,7 @@ command line gameState = do
       _ -> do wrongCommand gameState
 
 gameOver :: GameState -> Bool
-gameOver gameState = first gameState == length (third gameState)
+gameOver gameState = getRoomId gameState == length (getRoomsStates gameState)
 
 game :: GameState -> IO()
 game gameState = do

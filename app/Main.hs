@@ -7,6 +7,7 @@ import Prelude
 type GameState = (Int, [String], [[String]], [Int], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters, sequence)
 
 initialGameState :: GameState
+
 initialGameState = (2, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0], [0, 0, 0]) --TODO change inital state to 0
 
 first :: (a, b, c, d, e) -> a
@@ -198,46 +199,60 @@ incorrectUsage gameState item roomObject = do
   putStrLn output
   game gameState
 
+use0 :: GameState -> String -> String -> IO()
+use0 gameState item roomObject = do
+  let inventoryState = second gameState
+      roomsState = third gameState
+      counters = fourth gameState
+  if item == "klucz" && roomObject == "drzwi" then do
+    let newInventoryState = removeFromList item inventoryState
+        newGameState = (1, newInventoryState, roomsState, counters)
+    lookAround newGameState
+    else incorrectUsage gameState item roomObject
+
+use3 :: GameState -> String -> String -> IO()
+use3 gameState item roomObject = do
+  let inventoryState = second gameState
+      roomsState = third gameState
+      counters = fourth gameState
+  if item == "wytrych" && roomObject == "drzwi" then do
+    let newInventoryState = removeFromList item inventoryState
+        newGameState = (4, newInventoryState, roomsState, counters)
+    lookAround newGameState
+  else incorrectUsage gameState item roomObject
+
+use4 :: GameState -> String -> String -> IO()
+use4 gameState item roomObject = do
+  let inventoryState = second gameState
+      roomsState = third gameState
+      counters = fourth gameState
+      currentRoomState = roomsState !! 4
+  if item == "pila" || item == "siekiera" && roomObject == "cialo" then do
+    let newCurrentRoomState = removeFromList roomObject currentRoomState --remove roomObject currentRoom
+        newCurrentRoomState2 = addElementToRoom newCurrentRoomState "cialo-bez-reki"
+        newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "reka"
+        newRoomsState = replaceNth 4 newCurrentRoomState3 roomsState --update roomsState
+        newGameState = (4, inventoryState, newRoomsState, counters)
+    putStrLn "Odciales reke od ciala"
+    game newGameState
+  else if item == "reka" && roomObject == "czytnik" then do
+    let newInventoryState = removeFromList item inventoryState
+        newGameState = (5, newInventoryState, roomsState, counters)
+    lookAround newGameState
+  else do
+    incorrectUsage gameState item roomObject
+
 use :: GameState -> String -> String -> IO()
 use gameState item roomObject = do
   let roomId = first gameState
       inventoryState = second gameState
-      roomsState = third gameState
-      counters = fourth gameState
-      sequences = fifth gameState
-      currentRoomState = roomsState !! roomId
+
   if isOnList item inventoryState then do
-    if roomId == 0 then do
-      if item == "klucz" && roomObject == "drzwi" then do
-        let newInventoryState = removeFromList item inventoryState
-            newGameState = (roomId + 1, newInventoryState, roomsState, counters, sequences)
-        lookAround newGameState
-      else do
-        incorrectUsage gameState item roomObject
-    else if roomId == 3 then do
-      if item == "wytrych" && roomObject == "drzwi" then do
-        let newInventoryState = removeFromList item inventoryState
-            newGameState = (roomId + 1, newInventoryState, roomsState, counters, sequences)
-        lookAround newGameState
-      else do
-        incorrectUsage gameState item roomObject
-    else if roomId == 4 then do
-      if item == "pila" || item == "siekiera" && roomObject == "cialo" then do
-        let newCurrentRoomState = removeFromList roomObject currentRoomState --remove roomObject currentRoom
-            newCurrentRoomState2 = addElementToRoom newCurrentRoomState "cialo-bez-reki"
-            newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "reka"
-            newRoomsState = replaceNth roomId newCurrentRoomState3 roomsState --update roomsState
-            newGameState = (roomId, inventoryState, newRoomsState, counters, sequences)
-        putStrLn "Odciales reke od ciala"
-        game newGameState
-      else if item == "reka" && roomObject == "czytnik" then do
-        let newInventoryState = removeFromList item inventoryState
-            newGameState = (roomId + 1, newInventoryState, roomsState, counters, sequences)
-        lookAround newGameState
-       else do
-         incorrectUsage gameState item roomObject
-    else do
-      incorrectUsage gameState item roomObject
+    case roomId of
+      0 -> use0 gameState item roomObject
+      3 -> use3 gameState item roomObject
+      4 -> use4 gameState item roomObject
+      _ -> incorrectUsage gameState item roomObject
   else do
     let output = "Nie posiadasz przedmiotu " ++ item
     putStrLn output

@@ -4,6 +4,8 @@ import System.IO (hFlush, stdout)
 import System.Exit
 import Prelude
 
+{-# LANGUAGE FlexibleInstances #-}
+
 type GameState = (Int, [String], [[String]], [Int], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters, sequence)
 
 initialGameState :: GameState
@@ -258,18 +260,25 @@ use2Items gameState item roomObject = do
 
 compareSequences :: GameState -> [Int] -> Int -> [Int] -> IO()
 compareSequences gameState sequence leverIndex correctSequence = do
-  if sequence !! leverIndex > 0 then game gameState
+  if sequence !! leverIndex > 0 then do
+   putStrLn "Przeciągnąłeś już wcześniej tę dźwignię. Nic nowego tym razem się nie wydarzyło."
+   game gameState
   else do
+    putStrLn "Przeciągnąłeś wybraną dźwignię."
     if sequence == correctSequence then do
-      putStrLn "ekstra"
       let newSequence = replaceNth leverIndex 1 sequence
-      game (first gameState, second gameState, third gameState, fourth gameState, newSequence)
+      if newSequence == [1, 1, 1] then do
+        putStrLn "Była to poprawna sekwencja. Powoli otwierają się drzwi do kolejnego pomieszczenia!"
+        game (first gameState + 1, second gameState, third gameState, fourth gameState, fifth gameState)
+      else do
+        game (first gameState, second gameState, third gameState, fourth gameState, newSequence)
     else do
       let newSequence = replaceNth leverIndex 2 sequence
       if isOnList 0 newSequence then
         game (first gameState, second gameState, third gameState, fourth gameState, newSequence)
       else do
-        putStrLn "przegranko"
+        putStrLn "Pociągnąłeś ostatnią dźwignię. Po chwili widzisz jak każda z nich wraca na początkową pozycję."
+        putStrLn "Możesz spróbować ponownie."
         game (first gameState, second gameState, third gameState, fourth gameState, [0, 0, 0])
 
 -- niebieski czerwony zielony
@@ -378,10 +387,8 @@ gameOver gameState = first gameState == 5
 
 game :: GameState -> IO()
 game gameState = do
-    let seq = fifth gameState
     if gameOver gameState then putStrLn "Koniec gry!"
     else do
-      print seq
       line <- getInputLine "Co robisz?";
       let tokenizedLine = tokenize line
       command tokenizedLine gameState

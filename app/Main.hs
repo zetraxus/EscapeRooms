@@ -1,25 +1,28 @@
 module Main where
-
+  
 import System.IO (hFlush, stdout)
 import System.Exit
 import Prelude
 
-type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters)
+type GameState = (Int, [String], [[String]], [Int], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters, sequence)
 
 initialGameState :: GameState
-initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0]) --TODO change inital state to 0
+initialGameState = (2, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0], [0, 0, 0]) --TODO change inital state to 0
 
-first :: (a, b, c, d) -> a
-first (a, _, _, _) = a
+first :: (a, b, c, d, e) -> a
+first (a, _, _, _, _) = a
 
-second :: (a, b, c, d) -> b
-second (_, b, _, _) = b
+second :: (a, b, c, d, e) -> b
+second (_, b, _, _, _) = b
 
-third :: (a, b, c, d) -> c
-third (_, _, c, _) = c
+third :: (a, b, c, d, e) -> c
+third (_, _, c, _, _) = c
 
-fourth :: (a, b, c, d) -> d
-fourth (_, _, _, d) = d
+fourth :: (a, b, c, d, e) -> d
+fourth (_, _, _, d, _) = d
+  
+fifth :: (a, b, c, d, e) -> e
+fifth (_, _, _, _, e) = e
 
 removeFromList :: Eq a => a -> [a] -> [a]
 removeFromList _ [] = []
@@ -146,6 +149,7 @@ pickUp gameState item = do
       inventoryState = second gameState
       roomsState = third gameState
       counters = fourth gameState
+      sequences = fifth gameState
       currentRoomState = roomsState !! roomId
 
   if isOnList item currentRoomState then do --check if on the list
@@ -156,7 +160,7 @@ pickUp gameState item = do
         let newCurrentRoomState = removeFromList item currentRoomState --remove item currentRoom
             newRoomsState = replaceNth roomId newCurrentRoomState roomsState --update roomsState
             newInventoryState = addElementToEq inventoryState item
-            newGameState = (roomId, newInventoryState, newRoomsState, counters) --update gameState
+            newGameState = (roomId, newInventoryState, newRoomsState, counters, sequences) --update gameState
             output = "Podnosisz " ++ item
         putStrLn output
         game newGameState
@@ -200,19 +204,20 @@ use gameState item roomObject = do
       inventoryState = second gameState
       roomsState = third gameState
       counters = fourth gameState
+      sequences = fifth gameState
       currentRoomState = roomsState !! roomId
   if isOnList item inventoryState then do
     if roomId == 0 then do
       if item == "klucz" && roomObject == "drzwi" then do
         let newInventoryState = removeFromList item inventoryState
-            newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+            newGameState = (roomId + 1, newInventoryState, roomsState, counters, sequences)
         lookAround newGameState
       else do
         incorrectUsage gameState item roomObject
     else if roomId == 3 then do
       if item == "wytrych" && roomObject == "drzwi" then do
         let newInventoryState = removeFromList item inventoryState
-            newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+            newGameState = (roomId + 1, newInventoryState, roomsState, counters, sequences)
         lookAround newGameState
       else do
         incorrectUsage gameState item roomObject
@@ -222,12 +227,12 @@ use gameState item roomObject = do
             newCurrentRoomState2 = addElementToRoom newCurrentRoomState "cialo-bez-reki"
             newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "reka"
             newRoomsState = replaceNth roomId newCurrentRoomState3 roomsState --update roomsState
-            newGameState = (roomId, inventoryState, newRoomsState, counters)
+            newGameState = (roomId, inventoryState, newRoomsState, counters, sequences)
         putStrLn "Odciales reke od ciala"
         game newGameState
       else if item == "reka" && roomObject == "czytnik" then do
         let newInventoryState = removeFromList item inventoryState
-            newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+            newGameState = (roomId + 1, newInventoryState, roomsState, counters, sequences)
         lookAround newGameState
        else do
          incorrectUsage gameState item roomObject
@@ -244,12 +249,13 @@ craft gameState item1 item2 = do
       inventoryState = second gameState
       roomsState = third gameState
       counters = fourth gameState
+      sequences = fifth gameState
   if isOnList item1 inventoryState && isOnList item2 inventoryState then do
     if (item1 == "drut" && item2 == "blaszka") || (item1 == "blaszka" && item2 == "drut") then do
       let newInventoryState = removeFromList item1 inventoryState
           newInventoryState2 = removeFromList item2 newInventoryState
           newInventoryState3 = newInventoryState2 ++ ["wytrych"]
-          newGameState = (roomId, newInventoryState3, roomsState, counters)
+          newGameState = (roomId, newInventoryState3, roomsState, counters, sequences)
       putStrLn "Zrobiles wytrych"
       game newGameState
 --    else if roomId == 1 && item == "xd" && roomObject == "xd2" then do
@@ -275,10 +281,11 @@ enterCode gameState code = do
       inventoryState = second gameState
       roomsState = third gameState
       counters = fourth gameState
+      sequences = fifth gameState
       triesLeftCode = counters !! roomId
   if code == "27508" then do
     putStrLn "bzzz: PRAWIDLOWY KOD" 
-    let newGameState = (roomId + 1, inventoryState, roomsState, counters)
+    let newGameState = (roomId + 1, inventoryState, roomsState, counters, sequences)
     lookAround newGameState
   else if triesLeftCode == 0 then do
     putStrLn "bzzz: ZLY KOD"
@@ -286,7 +293,7 @@ enterCode gameState code = do
     putStrLn "Koniec gry: Umarles z glodu!"
   else do
     let newCounters = incrementCounter (-1) roomId counters
-        newGameState = (roomId, inventoryState, roomsState, newCounters) --update gameState
+        newGameState = (roomId, inventoryState, roomsState, newCounters, sequences) --update gameState
     putStrLn "bzzz: ZLY KOD"
     game newGameState
     
@@ -315,13 +322,13 @@ command line gameState = do
   else do
     let cmd = head line
     case cmd of
-      "rozejrzyj" -> if length line == 1 || (length line == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
-      "podnies" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
-      "przeczytaj" -> if length line == 2 then readNote gameState (line !! 1) else wrongCommand gameState
-      "uzyj" -> use gameState (line !! 1) (line !! 2)
-      "polacz" -> if length line == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
-      "przegladaj" -> if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
-      "wpisz" -> if length line == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState
+      "rozgladam" -> if length line == 1 || (length line == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
+      "podnosze" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
+      "czytam" -> if length line == 2 then readNote gameState (line !! 1) else wrongCommand gameState
+      "uzywam" -> use gameState (line !! 1) (line !! 2)
+      "lacze" -> if length line == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
+      "przegladam" -> if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
+      "wpisuje" -> if length line == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState
       "pomocy" -> help gameState
       "koniec" -> exitSuccess
       _ -> do wrongCommand gameState

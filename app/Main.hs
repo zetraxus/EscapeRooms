@@ -7,7 +7,7 @@ import Prelude
 type GameState = (Int, [String], [[String]], [Int]) -- (nr pokoju, inventory, [p1, p2, p3...], counters)
 
 initialGameState :: GameState
-initialGameState = (1, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0]) --TODO change inital state to 0
+initialGameState = (0, [], [["klucz"], ["notatka", "list"], ["papier", "worek"], ["drut", "blaszka"], ["pila", "siekiera", "papier-scierny", "cialo"], ["xd"]], [0, 2, 0, 0, 0, 0]) --TODO change inital state to 0
 
 first :: (a, b, c, d) -> a
 first (a, _, _, _) = a
@@ -49,10 +49,10 @@ tokenize command = do
   
 printGameState :: GameState -> IO()
 printGameState gameState = do
-  let roomId = first(gameState)
-      inventory = second(gameState)
-      roomState = third(gameState) !! roomId
-      counters = fourth(gameState)
+  let roomId = first gameState
+      inventory = second gameState
+      roomState = third gameState !! roomId
+      counters = fourth gameState
   print roomId
   print inventory
   print roomState
@@ -62,7 +62,7 @@ printGameState gameState = do
 lookAround :: GameState -> IO()
 lookAround gameState = do
   --printGameState gameState
-  let roomId = first(gameState)
+  let roomId = first gameState
   case roomId of
     0 -> lookAround0 gameState
     1 -> lookAround1 gameState
@@ -74,8 +74,8 @@ lookAround gameState = do
 
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
-  let roomId = first(gameState)
-      roomState = third(gameState) !! roomId
+  let roomId = first gameState
+      roomState = third gameState !! roomId
       outputPart1 = "Ocknales sie. Lezysz na podlodze w dziwnym pomieszczeniu. Pierwszy raz je widzisz.\nWstajesz i przecierasz oczy. To nie jest sen. Na scianie przed Toba widnieje\nnamazany czerwona substacja napis: 'Nie ma ratunku!'. W pokoju znajduje sie jeszcze\nstolik oraz wielkie czerwone drzwi."
       outputPart2 = " Podchodzisz... Na stole lezy klucz."
   if isOnList "klucz" roomState then do
@@ -87,8 +87,8 @@ lookAround0 gameState = do
 
 lookAround1 :: GameState -> IO()
 lookAround1 gameState = do
-  let roomId = first(gameState)
-      roomState = third(gameState) !! roomId
+  let roomId = first gameState
+      roomState = third gameState !! roomId
       outputPart1 = "Przechodzisz do drugiego pokoju. Na podlodze lezy szkielet. Chyba jest to szkielet\nTwojego poprzednika, ktoremu nie udalo sie uciec."
       outputPart2 = " Szkielet trzyma w rece jakies\nzawiniatko - chyba jest to jakis list."
       outputPart3 = " Dodatkowo widzisz jeszcze stolik, na ktorym\nlezy notatka."
@@ -133,7 +133,7 @@ lookAround5 gameState = do
 
 addElementToEq :: [String] -> String -> [String]
 addElementToEq inventoryState item = do
-  if (item == "worek") then do inventoryState ++ ["czerwona-przekladnia", "niebieska-przekladnia", "zielona-przekladnia"]
+  if item == "worek" then do inventoryState ++ ["czerwona-przekladnia", "niebieska-przekladnia", "zielona-przekladnia"]
     else do inventoryState ++ [item]
 
 addElementToRoom :: [String] -> String -> [String]
@@ -142,14 +142,14 @@ addElementToRoom roomState item = do
 
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do
-  let roomId = first(gameState)
-      inventoryState = second(gameState)
-      roomsState = third(gameState)
-      counters = fourth(gameState)
+  let roomId = first gameState
+      inventoryState = second gameState
+      roomsState = third gameState
+      counters = fourth gameState
       currentRoomState = roomsState !! roomId
 
   if isOnList item currentRoomState then do --check if on the list
-    if (item == "cialo" || item == "cialo-bez-reki") then do
+    if item == "cialo" || item == "cialo-bez-reki" then do
       putStrLn "Nie mozna podniesc ciala - jest za ciezkie."
       game gameState
       else do
@@ -167,8 +167,8 @@ pickUp gameState item = do
 
 readNote :: GameState -> String -> IO()
 readNote gameState item = do
-  let roomId = first(gameState)
-  let inventoryState = second(gameState)
+  let roomId = first gameState
+      inventoryState = second gameState
   if isOnList item inventoryState then do
     if item == "list" then do
       putStrLn "Witaj podrozniku!\nJesli czytasz ten list prawdopodobnie jestes w takiej samej sytuacji jak ja teraz. Notatka jest zdradliwa, aby otworzyc drzwi musisz podac prawidlowy kod, jednak notatka nie precyzuje dokladnie jaki jest kod. Niestety po 3 probie wpisanie kodu mechanizm zablokowal sie, a na wyswietlaczu pojawil sie licznik. Po kilku dniach zorientowalem sie, ze licznik pokazuje liczbe dni do jakiegos wydarzenia. (Byc moze do oblokowania mechanizmu) Zostaly mi jeszcze 83 dni. Jesli to czytasz chcialbym Cie poinformowac, ze poczatkowe liczby pierwsze, ktore wyznaczylem do obliczenia kodu to 11, 13 i 29. Niestety zadna z nich nie jest prawidlowa.\nSprawdz inne liczby. Moze Ci sie uda.\nPowodzenia!"
@@ -187,39 +187,52 @@ readNote gameState item = do
     let output = "Nie posiadasz " ++ item
     putStrLn output
     game gameState
+    
+incorrectUsage :: GameState -> String -> String -> IO()
+incorrectUsage gameState item roomObject = do
+  let output = "Nie mozna uzyc " ++ item ++ " z obiektem " ++ roomObject
+  putStrLn output
+  game gameState
 
 use :: GameState -> String -> String -> IO()
 use gameState item roomObject = do
-  let roomId = first(gameState)
-      inventoryState = second(gameState)
-      roomsState = third(gameState)
-      counters = fourth(gameState)
+  let roomId = first gameState
+      inventoryState = second gameState
+      roomsState = third gameState
+      counters = fourth gameState
       currentRoomState = roomsState !! roomId
   if isOnList item inventoryState then do
-    if roomId == 0 && item == "klucz" && roomObject == "drzwi" then do
-      let newInventoryState = removeFromList item inventoryState
-          newGameState = (roomId + 1, newInventoryState, roomsState, counters)
-      lookAround newGameState
-    else if roomId == 3 && item == "wytrych" && roomObject == "drzwi" then do
-      let newInventoryState = removeFromList item inventoryState
-          newGameState = (roomId + 1, newInventoryState, roomsState, counters)
-      lookAround newGameState
-    else if roomId == 4 && (item == "pila" || item == "siekiera") && roomObject == "cialo" then do
-      let newCurrentRoomState = removeFromList roomObject currentRoomState --remove roomObject currentRoom
-          newCurrentRoomState2 = addElementToRoom newCurrentRoomState "cialo-bez-reki"
-          newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "reka"
-          newRoomsState = replaceNth roomId newCurrentRoomState3 roomsState --update roomsState
-          newGameState = (roomId, inventoryState, newRoomsState, counters)
-      putStrLn "Odciales reke od ciala"
-      game newGameState
-    else if roomId == 4 && item == "reka" && roomObject == "czytnik" then do
-      let newInventoryState = removeFromList item inventoryState
-          newGameState = (roomId + 1, newInventoryState, roomsState, counters)
-      lookAround newGameState
+    if roomId == 0 then do
+      if item == "klucz" && roomObject == "drzwi" then do
+        let newInventoryState = removeFromList item inventoryState
+            newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+        lookAround newGameState
+      else do
+        incorrectUsage gameState item roomObject
+    else if roomId == 3 then do
+      if item == "wytrych" && roomObject == "drzwi" then do
+        let newInventoryState = removeFromList item inventoryState
+            newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+        lookAround newGameState
+      else do
+        incorrectUsage gameState item roomObject
+    else if roomId == 4 then do
+      if item == "pila" || item == "siekiera" && roomObject == "cialo" then do
+        let newCurrentRoomState = removeFromList roomObject currentRoomState --remove roomObject currentRoom
+            newCurrentRoomState2 = addElementToRoom newCurrentRoomState "cialo-bez-reki"
+            newCurrentRoomState3 = addElementToRoom newCurrentRoomState2 "reka"
+            newRoomsState = replaceNth roomId newCurrentRoomState3 roomsState --update roomsState
+            newGameState = (roomId, inventoryState, newRoomsState, counters)
+        putStrLn "Odciales reke od ciala"
+        game newGameState
+      else if item == "reka" && roomObject == "czytnik" then do
+        let newInventoryState = removeFromList item inventoryState
+            newGameState = (roomId + 1, newInventoryState, roomsState, counters)
+        lookAround newGameState
+       else do
+         incorrectUsage gameState item roomObject
     else do
-      let output = "Nie mozna uzyc " ++ item ++ " z obiektem " ++ roomObject
-      putStrLn output
-      game gameState
+      incorrectUsage gameState item roomObject
   else do
     let output = "Nie posiadasz przedmiotu " ++ item
     putStrLn output
@@ -227,10 +240,10 @@ use gameState item roomObject = do
 
 craft :: GameState -> String -> String -> IO()
 craft gameState item1 item2 = do
-  let roomId = first(gameState)
-      inventoryState = second(gameState)
-      roomsState = third(gameState)
-      counters = fourth(gameState)
+  let roomId = first gameState
+      inventoryState = second gameState
+      roomsState = third gameState
+      counters = fourth gameState
   if isOnList item1 inventoryState && isOnList item2 inventoryState then do
     if (item1 == "drut" && item2 == "blaszka") || (item1 == "blaszka" && item2 == "drut") then do
       let newInventoryState = removeFromList item1 inventoryState
@@ -252,16 +265,16 @@ craft gameState item1 item2 = do
 
 showEq :: GameState -> IO()
 showEq gameState = do
-  let inventoryState = second(gameState)
+  let inventoryState = second gameState
   print inventoryState
   game gameState
 
 enterCode :: GameState -> String -> IO()
 enterCode gameState code = do
-  let roomId = first(gameState)
-      inventoryState = second(gameState)
-      roomsState = third(gameState)
-      counters = fourth(gameState)
+  let roomId = first gameState
+      inventoryState = second gameState
+      roomsState = third gameState
+      counters = fourth gameState
       triesLeftCode = counters !! roomId
   if code == "27508" then do
     putStrLn "bzzz: PRAWIDLOWY KOD" 
@@ -298,23 +311,23 @@ wrongCommand gameState = do
 
 command :: [String] -> GameState -> IO ()
 command line gameState = do
-  if (length line) > 3 then wrongCommand gameState
+  if length line > 3 then wrongCommand gameState
   else do
     let cmd = head line
     case cmd of
-      "rozejrzyj" -> if (length line) == 1 || ((length line) == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
-      "podnies" -> if (length line) == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
-      "przeczytaj" -> if (length line) == 2 then readNote gameState (line !! 1) else wrongCommand gameState
+      "rozejrzyj" -> if length line == 1 || (length line == 2 && (line !! 1) == "sie") then lookAround gameState else wrongCommand gameState
+      "podnies" -> if length line == 2 then pickUp gameState (line !! 1) else wrongCommand gameState
+      "przeczytaj" -> if length line == 2 then readNote gameState (line !! 1) else wrongCommand gameState
       "uzyj" -> use gameState (line !! 1) (line !! 2)
-      "polacz" -> if (length line) == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
-      "przegladaj" -> if (length line) == 1 || ((length line) == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
-      "wpisz" -> if (length line) == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState
+      "polacz" -> if length line == 3 then craft gameState (line !! 1) (line !! 2) else wrongCommand gameState
+      "przegladaj" -> if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek") then showEq gameState else wrongCommand gameState
+      "wpisz" -> if length line == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2) else wrongCommand gameState
       "pomocy" -> help gameState
       "koniec" -> exitSuccess
       _ -> do wrongCommand gameState
 
 gameOver :: GameState -> Bool
-gameOver gameState = first(gameState) == 5
+gameOver gameState = first gameState == 5
 
 game :: GameState -> IO()
 game gameState = do

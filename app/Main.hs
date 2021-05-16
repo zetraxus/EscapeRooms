@@ -287,7 +287,7 @@ help :: GameState -> IO()
 help gameState = do
   putStrLn "=============="
   putStrLn "Dostepne komendy:"
-  putStrLn "rozejrzyj sie, podnies, przeczytaj, uzyj, polacz, przegladaj ekwipunek, wpisz kod, pomocy, koniec"
+  putStrLn "- rozejrzyj sie\n- podnies <przedmiot>\n- przeczytaj <przedmiot>\n- uzyj\n- polacz <przedmiot 1> <przedmiot 2>\n- przegladaj ekwipunek\n- wpisz kod <kod>\n- pomocy\n- koniec"
   putStrLn "=============="
   game gameState
 

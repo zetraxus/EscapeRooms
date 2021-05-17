@@ -125,9 +125,9 @@ lookAround3 gameState = do
       msg1 = "W następnym pomieszczeniu nic nie widzisz. Wszędzie unosi sie dym. Po zatrzaśnięciu poprzednich drzwi\
               \\nwiesz, że nie masz powrotu, wchodzisz zasłaniając usta i nos rękami. Po omacku badasz pomieszczenie.\
               \\nNa podłodze leży "
-      msg2 =  "kawałek drutu, "
-      msg3 =  "blaszka, "
-      msg4 =  "butelka z wodą i ręcznik. Moczysz ręcznik wodą i tworzysz z niego coś w rodzaju maski.\
+      msg2 = "kawałek drutu, "
+      msg3 = "blaszka, "
+      msg4 = "butelka z wodą i ręcznik. Moczysz ręcznik wodą i tworzysz z niego coś w rodzaju maski.\
               \\nTeraz możesz eksplorować dalej. Znajdujesz drzwi. Nie posiadają\
               \\none zamka, zamiast tego zauważasz starą kłódkę."
   if isOnList "drut" roomItems && isOnList "blaszka" roomItems then do
@@ -140,21 +140,42 @@ lookAround3 gameState = do
     putStrLn $ msg1 ++ msg4
   game gameState
 
-lookAround4 :: GameState -> IO() --TODO not modular not implemented
+lookAround4 :: GameState -> IO()
 lookAround4 gameState = do
-  let output = "Po odblokowaniu drzwi pędzisz do kolejnego pomieszczenia. Ponownie, tak jak i wcześniej, \ndrzwi za Tobą\
-                \zatrzaskują się. W następnym pokoju na przeciwległej ścianie widzisz drzwi \noraz świecący ekran. Gdy\
-                \się do niego zbliżasz, zauważasz, że jest to czytnik linii papilarnych, \ndo którego natychmiast \
-                \przykładasz dłoń - niestety, na ekranie pojawia się komunikat \n\"brak dostępu\". Rozglądasz się \
-                \uważniej po pomieszczeniu i widzisz mnóstwo elementów \nwskazujących na to, iż był to jakiś warsztat. \
-                \Na stole znajdują się narzędzia stolarskie: \npiła, siekiera, młotek i różnego rodzaju pilniki. Na \
-                \ścianach znajdują się obrazy pewnego \nmężczyzny, a w kącie wiele ukończonych i nieukończonych \
-                \wynalazków. Przyglądasz się im \nuważnie i dostrzegasz fascynację wynalazcy anatomią. Być może \
-                \eksperymentował nad stworzeniem \nnowej protezy lub egzoszkieletu. Po dłuższej chwili obserwujesz w \
-                \drugim rogu pokoju krzesło, \nna którym znajduje się coś na kształt człowieka, to chyba jego kolejny \
-                \eksperyment. \nPrzyglądasz się dokładniej manekinowi i widzisz bardzo precyzyjnie wykonaną twarz, \
-                \wyglądającą \njak osoba z otaczających Cię obrazów, i dłonie, które wyglądają jak u żywego człowieka."
-  putStrLn output
+  let roomItems = getItemsInCurrentRoom gameState
+  let msg1 = "Po odblokowaniu drzwi pędzisz do kolejnego pomieszczenia. Ponownie, tak jak i wcześniej, \ndrzwi za Tobą\
+              \zatrzaskują się. W następnym pokoju na przeciwległej ścianie widzisz drzwi \noraz świecący ekran. Gdy\
+              \się do niego zbliżasz, zauważasz, że jest to czytnik linii papilarnych, \ndo którego natychmiast \
+              \przykładasz dłoń - niestety, na ekranie pojawia się komunikat \n\"brak dostępu\". Rozglądasz się \
+              \uważniej po pomieszczeniu i widzisz mnóstwo elementów \nwskazujących na to, iż był to jakiś warsztat. \
+              \Na stole znajdują się narzędzia stolarskie: \n"
+      msg2 = "piła, "
+      msg3 = "siekiera, "
+      msg4 = "młotek i różnego rodzaju pilniki. Na \
+              \ścianach znajdują się obrazy pewnego \nmężczyzny, a w kącie wiele ukończonych i nieukończonych \
+              \wynalazków. Przyglądasz się im \nuważnie i dostrzegasz fascynację wynalazcy anatomią. Być może \
+              \eksperymentował nad stworzeniem \nnowej protezy lub egzoszkieletu. Po dłuższej chwili obserwujesz w \
+              \drugim rogu pokoju krzesło, \nna którym znajduje się coś na kształt człowieka, to chyba jego kolejny \
+              \eksperyment. \nPrzyglądasz się dokładniej manekinowi i widzisz bardzo precyzyjnie wykonaną twarz, \
+              \wyglądającą \njak osoba z otaczających Cię obrazów"
+      msg5 = ", i dłonie, które wyglądają jak u żywego człowieka"
+      msg6 = "."
+  if isOnList "pila" roomItems && isOnList "siekiera" roomItems && isOnList "manekin" roomItems then do--TODO tested
+    putStrLn $ msg1 ++ msg2 ++ msg3 ++ msg4 ++ msg5 ++ msg6
+  else if isOnList "pila" roomItems && isOnList "siekiera" roomItems then do
+    putStrLn $ msg1 ++ msg2 ++ msg3 ++ msg4 ++ msg6
+  else if isOnList "pila" roomItems && isOnList "manekin" roomItems then do--TODO tested
+    putStrLn $ msg1 ++ msg2 ++ msg4 ++ msg5 ++ msg6
+  else if isOnList "siekiera" roomItems && isOnList "manekin" roomItems then do--TODO tested
+    putStrLn $ msg1 ++ msg3 ++ msg4 ++ msg5 ++ msg6
+  else if isOnList "pila" roomItems then do
+    putStrLn $ msg1 ++ msg2 ++ msg4 ++ msg6
+  else if isOnList "siekiera" roomItems then do
+    putStrLn $ msg1 ++ msg3 ++ msg4 ++ msg6
+  else if isOnList "manekin" roomItems then do--TODO tested
+    putStrLn $ msg1 ++ msg4 ++ msg5 ++ msg6
+  else do
+    putStrLn $ msg1 ++ msg4 ++ msg6
   game gameState
 
 pickUp :: GameState -> String -> IO()

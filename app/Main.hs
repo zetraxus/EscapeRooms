@@ -294,8 +294,8 @@ use2Items gameState item roomObject = do
     putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item ++ "."
     game gameState
 
-useLever :: GameState -> [Int] -> Int -> [Int] -> IO()
-useLever gameState sequence leverIndex correctSequence = do
+pullLever :: GameState -> [Int] -> Int -> [Int] -> IO()
+pullLever gameState sequence leverIndex correctSequence = do
   if sequence !! leverIndex > 0 then do
    putStrLn "Przeciągnąłeś już wcześniej tę dźwignię. Nic nowego tym razem się nie wydarzyło."
    game gameState
@@ -327,12 +327,12 @@ useLever :: GameState -> String -> IO()
 useLever gameState item = do
   if getRoomId gameState == 2 then do
     case item of
-      "czerwona" -> useLever gameState (getSequence gameState) 0 [0, 1, 0]
-      "czerwoną" -> useLever gameState (getSequence gameState) 0 [0, 1, 0]
-      "niebieska" -> useLever gameState (getSequence gameState) 1 [0, 0, 0]
-      "niebieską" -> useLever gameState (getSequence gameState) 1 [0, 0, 0]
-      "zielona" -> useLever gameState (getSequence gameState) 2 [1, 1, 0]
-      "zieloną" -> useLever gameState (getSequence gameState) 2 [1, 1, 0]
+      "czerwona" -> pullLever gameState (getSequence gameState) 0 [0, 1, 0]
+      "czerwoną" -> pullLever gameState (getSequence gameState) 0 [0, 1, 0]
+      "niebieska" -> pullLever gameState (getSequence gameState) 1 [0, 0, 0]
+      "niebieską" -> pullLever gameState (getSequence gameState) 1 [0, 0, 0]
+      "zielona" -> pullLever gameState (getSequence gameState) 2 [1, 1, 0]
+      "zieloną" -> pullLever gameState (getSequence gameState) 2 [1, 1, 0]
       _ -> incorrectUsage gameState item ""
   else incorrectUsage gameState item ""
 
@@ -345,7 +345,7 @@ craft gameState item1 item2 = do
           newInventoryState2 = removeFromList item2 newInventoryState
           newInventoryState3 = "wytrych" : newInventoryState2
           newGameState = (getRoomId gameState, newInventoryState3, getRoomsStates gameState, getCounters gameState, getSequence gameState)
-      putStrLn "Zrobiłes wytrych."
+      putStrLn "Zrobiłeś wytrych."
       game newGameState
     else do
       putStrLn $ "Nie mozna połączyć przedmiotu " ++ item1 ++ " z przedmiotem " ++ item2 ++ "."
@@ -444,7 +444,7 @@ command line gameState = do
     else wrongCommand gameState
   else if isOnList (head line) useNames then do
     if isOnList (line !! 1) leverNames
-    then use gameState (line !! 2)
+    then useLever gameState (line !! 2)
     else if length line == 3
          then use2Items gameState (line !! 1) (line !! 2)
          else wrongCommand gameState

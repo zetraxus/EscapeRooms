@@ -13,7 +13,7 @@ initialRoomsStates :: [[String]]
 initialRoomsStates = [["klucz", "sztabka"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "manekin"]]
 
 initialGameState :: GameState
-initialGameState = (2, [], initialRoomsStates, [0, 2, 2, 0, 0], [0, 0, 0])
+initialGameState = (0, [], initialRoomsStates, [0, 2, 2, 0, 0], [0, 0, 0])
 
 getRoomId :: GameState -> Int
 getRoomId (a, _, _, _, _) = a

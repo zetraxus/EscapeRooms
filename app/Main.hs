@@ -277,8 +277,8 @@ useLever gameState sequence leverIndex correctSequence = do
                   \Możesz spróbować ponownie."
           game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, newCounters, [0, 0, 0])
 
-use :: GameState -> String -> IO()
-use gameState item = do
+useLever :: GameState -> String -> IO()
+useLever gameState item = do
   if getRoomId gameState == 2 then do
     case item of
       "czerwona" -> useLever gameState (getSequence gameState) 0 [0, 1, 0]

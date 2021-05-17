@@ -10,10 +10,10 @@ import Prelude
 type GameState = (Int, [String], [[String]], [Int], [Int])
 
 initialRoomsStates :: [[String]]
-initialRoomsStates = [["klucz"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "ciało"]]
+initialRoomsStates = [["klucz"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "manekin"]]
 
 initialGameState :: GameState
-initialGameState = (0, [], initialRoomsStates, [0, 2, 0, 0, 0], [0, 0, 0])
+initialGameState = (0, [], initialRoomsStates, [0, 2, 1, 0, 0], [0, 0, 0])
 
 getRoomId :: GameState -> Int
 getRoomId (a, _, _, _, _) = a
@@ -267,9 +267,15 @@ useLever gameState sequence leverIndex correctSequence = do
       if isOnList 0 newSequence then
         game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, getCounters gameState, newSequence)
       else do
-        putStrLn "Pociągnąłeś ostatnią dźwignię. Po chwili widzisz jak każda z nich wraca na początkową pozycję.\n\
+        let roomId = getRoomId gameState
+            newCounters = incrementCounter (-1) roomId (getCounters gameState)
+            triesLeftCode = newCounters !! roomId
+        if triesLeftCode == 0 then do
+            putStrLn "Próbując pociągnąć ostatnią dźwignię doszło do jej złamania. Nigdy już stąd nie wyjdziesz. Koniec gry."
+        else do
+          putStrLn "Pociągnąłeś ostatnią dźwignię. Po chwili widzisz jak każda z nich wraca na początkową pozycję.\n\
                   \Możesz spróbować ponownie."
-        game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, getCounters gameState, [0, 0, 0])
+          game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, newCounters, [0, 0, 0])
 
 use :: GameState -> String -> IO()
 use gameState item = do
@@ -321,7 +327,7 @@ enterCode gameState code = do
     
 incrementCounter :: Int -> Int -> [Int] -> [Int]
 incrementCounter value roomId counters = do
-  let counterValue = counters !! roomId --TODO check if exists
+  let counterValue = counters !! roomId
       newValue = counterValue + value
   replaceNthElement roomId newValue counters --update counters
 

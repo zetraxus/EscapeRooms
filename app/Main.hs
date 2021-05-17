@@ -71,7 +71,7 @@ lookAround gameState = do
     2 -> lookAround2 gameState
     3 -> lookAround3 gameState
     4 -> lookAround4 gameState
-    _ -> do putStrLn "Pokój nie istnieje"
+    _ -> do putStrLn "Pokój nie istnieje."
 
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
@@ -186,18 +186,18 @@ readNote gameState item = do
                 \\nkusząc strudzonych, by przycupnęli."
       game gameState
     else do
-      putStrLn $ "Nie możesz przeczytać przedmiotu " ++ item
+      putStrLn $ "Nie możesz przeczytać przedmiotu " ++ item ++ "."
       game gameState
   else do
-    putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item
+    putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item ++ "."
     game gameState
     
 incorrectUsage :: GameState -> String -> String -> IO()
 incorrectUsage gameState item roomObject = do
   if roomObject /= "" then
-    putStrLn $ "Nie można użyć przedmiotu " ++ item ++ " z obiektem " ++ roomObject
+    putStrLn $ "Nie można użyć przedmiotu " ++ item ++ " z obiektem " ++ roomObject ++ "."
   else
-    putStrLn $ "Nie można użyć przedmiotu " ++ item
+    putStrLn $ "Nie można użyć przedmiotu " ++ item ++ "."
   game gameState
 
 use0 :: GameState -> String -> String -> IO()
@@ -227,7 +227,7 @@ use4 gameState item roomObject = do
         newCurrentRoomState2 = "manekin-bez-ręki" : "dlon-manekina" : newCurrentRoomState
         newRoomsState = replaceNthElement roomId newCurrentRoomState2 roomsState
         newGameState = (getRoomId gameState, inventoryState, newRoomsState, getCounters gameState, getSequence gameState)
-    putStrLn "Odciąłeś dłoń manekina"
+    putStrLn "Odciąłeś dłoń manekina."
     game newGameState
   else if item == "dlon-manekina" && roomObject == "czytnik" then do
     let newInventoryState = removeFromList item inventoryState
@@ -245,7 +245,7 @@ use2Items gameState item roomObject = do
       4 -> use4 gameState item roomObject
       _ -> incorrectUsage gameState item roomObject
   else do
-    putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item
+    putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item ++ "."
     game gameState
 
 useLever :: GameState -> [Int] -> Int -> [Int] -> IO()
@@ -290,13 +290,13 @@ craft gameState item1 item2 = do
           newInventoryState2 = removeFromList item2 newInventoryState
           newInventoryState3 = "wytrych" : newInventoryState2
           newGameState = (getRoomId gameState, newInventoryState3, getRoomsStates gameState, getCounters gameState, getSequence gameState)
-      putStrLn "Zrobiłes wytrych"
+      putStrLn "Zrobiłes wytrych."
       game newGameState
     else do
-      putStrLn $ "Nie mozna połączyć przedmiotu " ++ item1 ++ " z przedmiotem " ++ item2
+      putStrLn $ "Nie mozna połączyć przedmiotu " ++ item1 ++ " z przedmiotem " ++ item2 ++ "."
       game gameState
   else do
-    putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item1 ++ " lub " ++ item2
+    putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item1 ++ " lub " ++ item2 ++ "."
     game gameState
 
 showInventory :: GameState -> IO()
@@ -335,7 +335,7 @@ help gameState = do
             \- czytam <przedmiot> \n\
             \- używam <przedmiot> \n\
             \- używam <przedmiot> <przedmiot> \n\
-            \- łączę <przedmiot 1> <przedmiot 2> \n\
+            \- łączę <przedmiot> <przedmiot> \n\
             \- przeglądam ekwipunek \n\
             \- wpisuję kod <kod> \n\
             \- pomocy \n\
@@ -354,10 +354,10 @@ dropItem gameState item = do
     let newInventory = removeFromList item (getInventory gameState)
         newRoomState = item : getItemsInCurrentRoom gameState
         newRoomsState = replaceNthElement (getRoomId gameState) newRoomState (getRoomsStates gameState)
-    putStrLn $ "Upuszczasz " ++ item
+    putStrLn $ "Upuszczasz " ++ item ++ "."
     game (getRoomId gameState, newInventory, newRoomsState, getCounters gameState, getSequence gameState)
    else do
-    putStrLn "Nie masz przedmiotu o takiej nazwie w swoim ekwipunku"
+    putStrLn "Nie masz przedmiotu o takiej nazwie w swoim ekwipunku."
     game gameState
 
 command :: [String] -> GameState -> IO ()

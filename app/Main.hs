@@ -104,23 +104,40 @@ lookAround1 gameState = do
     putStrLn $ msg1 ++ msg4
   game gameState
 
-lookAround2 :: GameState -> IO() --TODO not modular not implemented
+lookAround2 :: GameState -> IO()
 lookAround2 gameState = do
-  let output = "Wchodzisz do kolejnego pokoju - droga powrotu jest zablokowana. Po Twojej lewej stronie stoi regał\
-                \\npełen książek, zaś z prawej widzisz zestaw trzech kolorowych dźwigni - niebieską, zieloną i czerwoną.\
-                \\nPod regałem znajduje się sterta brudnych ubrań, a pośród nich można również zobaczyć długopis bez\
-                \\nskuwki, zgniecioną kartkę, paczkę zapałek i kilka drobnych monet."
-  putStrLn output
+  let roomItems = getItemsInCurrentRoom gameState
+      msg1 = "Wchodzisz do kolejnego pokoju - droga powrotu jest zablokowana. Po Twojej lewej stronie stoi regał\
+              \\npełen książek, zaś z prawej widzisz zestaw trzech kolorowych dźwigni - niebieską, zieloną i czerwoną.\
+              \\nPod regałem znajduje się sterta brudnych ubrań, a pośród nich można również zobaczyć długopis bez\
+              \\nskuwki, "
+      msg2 = "zgniecioną kartkę, "
+      msg3 = "paczkę zapałek i kilka drobnych monet."
+  if isOnList "kartka" roomItems then do
+    putStrLn $ msg1 ++ msg2 ++ msg3
+  else do
+    putStrLn $ msg1 ++ msg3
   game gameState
 
-lookAround3 :: GameState -> IO() --TODO not modular not implemented
+lookAround3 :: GameState -> IO()
 lookAround3 gameState = do
-  let output = "W następnym pomieszczeniu nic nie widzisz. Wszędzie unosi sie dym. Po zatrzaśnięciu poprzednich drzwi\
-                \\nwiesz, że nie masz powrotu, wchodzisz zasłaniając usta i nos rękami. Po omacku badasz pomieszczenie.\
-                \\nNa podłodze leży kawałek drutu, blaszka, butelka z wodą i ręcznik. Moczysz ręcznik wodą i tworzysz\
-                \\nz niego coś w rodzaju maski. Teraz możesz eksplorować dalej. Znajdujesz drzwi. Nie posiadają\
-                \\none zamka, zamiast tego zauważasz starą kłódkę."
-  putStrLn output
+  let roomItems = getItemsInCurrentRoom gameState
+      msg1 = "W następnym pomieszczeniu nic nie widzisz. Wszędzie unosi sie dym. Po zatrzaśnięciu poprzednich drzwi\
+              \\nwiesz, że nie masz powrotu, wchodzisz zasłaniając usta i nos rękami. Po omacku badasz pomieszczenie.\
+              \\nNa podłodze leży "
+      msg2 =  "kawałek drutu, "
+      msg3 =  "blaszka, "
+      msg4 =  "butelka z wodą i ręcznik. Moczysz ręcznik wodą i tworzysz z niego coś w rodzaju maski.\
+              \\nTeraz możesz eksplorować dalej. Znajdujesz drzwi. Nie posiadają\
+              \\none zamka, zamiast tego zauważasz starą kłódkę."
+  if isOnList "drut" roomItems && isOnList "blaszka" roomItems then do
+    putStrLn $ msg1 ++ msg2 ++ msg3 ++ msg4
+  else if isOnList "blaszka" roomItems then do
+    putStrLn $ msg1 ++ msg3 ++ msg4
+  else if isOnList "drut" roomItems then do
+    putStrLn $ msg1 ++ msg2 ++ msg4
+  else do
+    putStrLn $ msg1 ++ msg4
   game gameState
 
 lookAround4 :: GameState -> IO() --TODO not modular not implemented

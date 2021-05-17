@@ -385,12 +385,12 @@ help gameState = do
   putStrLn "============== \n\
             \Dostepne komendy: \n\
             \- rozglądam się \n\
-            \- podnoszę <przedmiot> \n\
-            \- upuszczam <przedmiot> \n\
-            \- czytam <przedmiot> \n\
-            \- używam <przedmiot> \n\
-            \- używam <przedmiot> <przedmiot> \n\
-            \- łączę <przedmiot> <przedmiot> \n\
+            \- podnoszę <przedmiot z otoczenia> \n\
+            \- upuszczam <przedmiot z ekwipunku> \n\
+            \- czytam <przedmiot z ekwipunku> \n\
+            \- używam dźwigni <kolor dźwigni> \n\
+            \- używam <przedmiot z ekwipunku> <przedmiot z otoczenia> \n\
+            \- łączę <przedmiot z ekwipunku> <przedmiot z ekwipunku> \n\
             \- przeglądam ekwipunek \n\
             \- wpisuję kod <kod> \n\
             \- pomocy \n\

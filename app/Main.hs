@@ -1,67 +1,11 @@
 module Main where
   
-import System.IO (hFlush, stdout)
 import System.Exit
 import Prelude
+import GameState
+import Utils
 
 {-# LANGUAGE FlexibleInstances #-}
-
--- (room id, inventory, [room_1 items, room_2 items, ...], counters, sequence)
-type GameState = (Int, [String], [[String]], [Int], [Int])
-
-initialRoomsStates :: [[String]]
-initialRoomsStates = [["klucz", "sztabka"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "manekin"]]
-
-initialGameState :: GameState
-initialGameState = (0, [], initialRoomsStates, [0, 2, 2, 0, 0], [0, 0, 0])
-
-getRoomId :: GameState -> Int
-getRoomId (a, _, _, _, _) = a
-
-getInventory :: GameState -> [String]
-getInventory (_, b, _, _, _) = b
-
-getRoomsStates :: GameState -> [[String]]
-getRoomsStates (_, _, c, _, _) = c
-
-getCounters :: GameState -> [Int]
-getCounters (_, _, _, d, _) = d
-  
-getSequence :: GameState -> [Int]
-getSequence (_, _, _, _, e) = e
-
-getItemsInCurrentRoom :: GameState -> [String]
-getItemsInCurrentRoom gameState =
-  getRoomsStates gameState !! getRoomId gameState
-
-removeFromList :: Eq a => a -> [a] -> [a]
-removeFromList _ [] = []
-removeFromList x (y:ys) | x == y = ys
-                        | otherwise = y : removeFromList x ys
-
-replaceNthElement :: Int -> a -> [a] -> [a]
-replaceNthElement _ _ [] = []
-replaceNthElement n newVal (x:xs) | n == 0 = newVal:xs
-                                  | otherwise = x:replaceNthElement (n-1) newVal xs
-                           
-isOnList :: Eq a => a -> [a] -> Bool
-isOnList _ [] = False 
-isOnList x (y:ys) | x == y = True
-                  | otherwise = isOnList x ys
-
-getInputLine :: String -> IO String
-getInputLine prompt = do
-    putStrLn prompt
-    hFlush stdout
-    getLine
-
-printGameState :: GameState -> IO()
-printGameState gameState = do
-  print $ getRoomId gameState
-  print $ getInventory gameState
-  print $ getItemsInCurrentRoom gameState
-  print $ getCounters gameState
-  print $ getSequence gameState
 
 lookAround :: GameState -> IO()
 lookAround gameState = do
@@ -297,8 +241,8 @@ use2Items gameState item roomObject = do
 pullLever :: GameState -> [Int] -> Int -> [Int] -> IO()
 pullLever gameState sequence leverIndex correctSequence = do
   if sequence !! leverIndex > 0 then do
-   putStrLn "Przeciągnąłeś już wcześniej tę dźwignię. Nic nowego tym razem się nie wydarzyło."
-   game gameState
+    putStrLn "Przeciągnąłeś już wcześniej tę dźwignię. Nic nowego tym razem się nie wydarzyło."
+    game gameState
   else do
     putStrLn "Przeciągnąłeś wybraną dźwignię."
     if sequence == correctSequence then do
@@ -326,8 +270,8 @@ pullLever gameState sequence leverIndex correctSequence = do
 useLever :: GameState -> String -> IO()
 useLever gameState item = do
   let redLeverNames = ["czerwona", "czerwoną", "czerwonej"]
-  let blueLeverNames = ["niebieska", "niebieską", "niebieskiej"]
-  let greenLeverNames = ["zielona", "zieloną", "zielonej"]
+      blueLeverNames = ["niebieska", "niebieską", "niebieskiej"]
+      greenLeverNames = ["zielona", "zieloną", "zielonej"]
 
   if getRoomId gameState == 2 then do
     if isOnList item redLeverNames then pullLever gameState (getSequence gameState) 0 [0, 1, 0]
@@ -411,23 +355,23 @@ dropItem gameState item = do
         newRoomsState = replaceNthElement (getRoomId gameState) newRoomState (getRoomsStates gameState)
     putStrLn $ "Upuszczasz " ++ item ++ "."
     game (getRoomId gameState, newInventory, newRoomsState, getCounters gameState, getSequence gameState)
-   else do
+  else do
     putStrLn "Nie masz przedmiotu o takiej nazwie w swoim ekwipunku."
     game gameState
 
 command :: [String] -> GameState -> IO ()
 command line gameState = do
   let dropItemNames = ["upuszczam", "upuść", "upusc"]
-  let lookAroundNames = ["rozglądam", "rozgladam", "rozejrzyj"]
-  let pickUpNames = ["podnoszę", "podnosze", "podnieś", "podnies"]
-  let readNoteNames = ["czytam", "przeczytaj", "czytaj"]
-  let useNames = ["używam", "uzywam", "użyj", "uzyj"]
-  let leverNames = ["dźwignię", "dźwignie", "dzwignię", "dzwignie", "dźwignia", "dzwignia", "dźwigni", "dzwigni"]
-  let craftNames = ["łączę", "łącze", "łaczę", "łacze", "lączę", "lącze", "laczę", "lacze", "połącz", "połacz", "polącz", "polacz"]
-  let showInventoryNames = ["przeglądam", "przegladam", "przejrzyj", "obejrzyj", "zobacz"]
-  let enterCodeNames = ["wpisuję", "wpisuje", "wpisz"]
-  let helpNames = ["pomocy", "pomoc", "help"]
-  let exitNames = ["koniec", "exit", "wyjście", "wyjscie", "wyjdź"]
+      lookAroundNames = ["rozglądam", "rozgladam", "rozejrzyj"]
+      pickUpNames = ["podnoszę", "podnosze", "podnieś", "podnies"]
+      readNoteNames = ["czytam", "przeczytaj", "czytaj"]
+      useNames = ["używam", "uzywam", "użyj", "uzyj"]
+      leverNames = ["dźwignię", "dźwignie", "dzwignię", "dzwignie", "dźwignia", "dzwignia", "dźwigni", "dzwigni"]
+      craftNames = ["łączę", "łącze", "łaczę", "łacze", "lączę", "lącze", "laczę", "lacze", "połącz", "połacz", "polącz", "polacz"]
+      showInventoryNames = ["przeglądam", "przegladam", "przejrzyj", "obejrzyj", "zobacz"]
+      enterCodeNames = ["wpisuję", "wpisuje", "wpisz"]
+      helpNames = ["pomocy", "pomoc", "help"]
+      exitNames = ["koniec", "exit", "wyjście", "wyjscie", "wyjdź"]
 
   if length line > 3 then do wrongCommand gameState
   else if isOnList (head line) dropItemNames then do
@@ -460,9 +404,6 @@ command line gameState = do
   else if isOnList (head line) helpNames then do help gameState
   else if isOnList (head line) exitNames then do exitSuccess
   else do wrongCommand gameState
-
-gameOver :: GameState -> Bool
-gameOver gameState = getRoomId gameState == length (getRoomsStates gameState)
 
 game :: GameState -> IO()
 game gameState = do

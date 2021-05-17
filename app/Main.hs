@@ -160,19 +160,19 @@ lookAround4 gameState = do
               \wyglądającą \njak osoba z otaczających Cię obrazów"
       msg5 = ", i dłonie, które wyglądają jak u żywego człowieka"
       msg6 = "."
-  if isOnList "pila" roomItems && isOnList "siekiera" roomItems && isOnList "manekin" roomItems then do--TODO tested
+  if isOnList "piła" roomItems && isOnList "siekiera" roomItems && isOnList "manekin" roomItems then do
     putStrLn $ msg1 ++ msg2 ++ msg3 ++ msg4 ++ msg5 ++ msg6
-  else if isOnList "pila" roomItems && isOnList "siekiera" roomItems then do
+  else if isOnList "piła" roomItems && isOnList "siekiera" roomItems then do
     putStrLn $ msg1 ++ msg2 ++ msg3 ++ msg4 ++ msg6
-  else if isOnList "pila" roomItems && isOnList "manekin" roomItems then do--TODO tested
+  else if isOnList "piła" roomItems && isOnList "manekin" roomItems then do
     putStrLn $ msg1 ++ msg2 ++ msg4 ++ msg5 ++ msg6
-  else if isOnList "siekiera" roomItems && isOnList "manekin" roomItems then do--TODO tested
+  else if isOnList "siekiera" roomItems && isOnList "manekin" roomItems then do
     putStrLn $ msg1 ++ msg3 ++ msg4 ++ msg5 ++ msg6
-  else if isOnList "pila" roomItems then do
+  else if isOnList "piła" roomItems then do
     putStrLn $ msg1 ++ msg2 ++ msg4 ++ msg6
   else if isOnList "siekiera" roomItems then do
     putStrLn $ msg1 ++ msg3 ++ msg4 ++ msg6
-  else if isOnList "manekin" roomItems then do--TODO tested
+  else if isOnList "manekin" roomItems then do
     putStrLn $ msg1 ++ msg4 ++ msg5 ++ msg6
   else do
     putStrLn $ msg1 ++ msg4 ++ msg6
@@ -182,9 +182,9 @@ lookAroundFinal :: GameState -> IO()
 lookAroundFinal gameState = do
   let finalMsg = "Udało Ci się! Wreszcie wyszedłeś na wolność. "
   if isOnList "sztabka" (getInventory gameState) then do
-    print $ finalMsg ++ "Udało Ci się zachować swoją sztabkę złota. Jesteś bogaty, gratulacje!"
+    putStrLn $ finalMsg ++ "Udało Ci się zachować swoją sztabkę złota. Jesteś bogaty, gratulacje!"
   else
-    print finalMsg
+    putStrLn finalMsg
     
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do

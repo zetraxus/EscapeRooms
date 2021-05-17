@@ -10,10 +10,10 @@ import Prelude
 type GameState = (Int, [String], [[String]], [Int], [Int])
 
 initialRoomsStates :: [[String]]
-initialRoomsStates = [["klucz"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "manekin"]]
+initialRoomsStates = [["klucz", "sztabka"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "manekin"]]
 
 initialGameState :: GameState
-initialGameState = (0, [], initialRoomsStates, [0, 2, 1, 0, 0], [0, 0, 0])
+initialGameState = (0, [], initialRoomsStates, [0, 2, 2, 0, 0], [0, 0, 0])
 
 getRoomId :: GameState -> Int
 getRoomId (a, _, _, _, _) = a
@@ -71,7 +71,7 @@ lookAround gameState = do
     2 -> lookAround2 gameState
     3 -> lookAround3 gameState
     4 -> lookAround4 gameState
-    _ -> do putStrLn "Pokój nie istnieje."
+    _ -> lookAroundFinal gameState 
 
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
@@ -157,6 +157,14 @@ lookAround4 gameState = do
   putStrLn output
   game gameState
 
+lookAroundFinal :: GameState -> IO()
+lookAroundFinal gameState = do
+  let finalMsg = "Udało Ci się! Wreszcie wyszedłeś na wolność. "
+  if isOnList "sztabka" (getInventory gameState) then do
+    print $ finalMsg ++ "Udało Ci się zachować swoją sztabkę złota. Jesteś bogaty, gratulacje!"
+  else
+    print finalMsg
+    
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do
   if isOnList item (getInventory gameState) then do
@@ -239,14 +247,14 @@ use4 gameState item roomObject = do
   let roomId = getRoomId gameState
       inventoryState = getInventory gameState
       roomsState = getRoomsStates gameState
-  if item == "piła" || item == "siekiera" && roomObject == "manekin" then do
+  if (item == "piła" || item == "siekiera") && roomObject == "manekin" then do
     let newCurrentRoomState = removeFromList roomObject (getItemsInCurrentRoom gameState)
-        newCurrentRoomState2 = "manekin-bez-ręki" : "dlon-manekina" : newCurrentRoomState
+        newCurrentRoomState2 = "manekin-bez-ręki" : "dłoń" : newCurrentRoomState
         newRoomsState = replaceNthElement roomId newCurrentRoomState2 roomsState
         newGameState = (getRoomId gameState, inventoryState, newRoomsState, getCounters gameState, getSequence gameState)
     putStrLn "Odciąłeś dłoń manekina."
     game newGameState
-  else if item == "dlon-manekina" && roomObject == "czytnik" then do
+  else if item == "dłoń" && roomObject == "czytnik" then do
     let newInventoryState = removeFromList item inventoryState
         newGameState = (roomId + 1, newInventoryState, roomsState, getCounters gameState, getSequence gameState)
     lookAround newGameState

@@ -13,7 +13,7 @@ initialRoomsStates :: [[String]]
 initialRoomsStates = [["klucz", "sztabka"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "manekin"]]
 
 initialGameState :: GameState
-initialGameState = (0, [], initialRoomsStates, [0, 2, 2, 0, 0], [0, 0, 0])
+initialGameState = (2, [], initialRoomsStates, [0, 2, 2, 0, 0], [0, 0, 0])
 
 getRoomId :: GameState -> Int
 getRoomId (a, _, _, _, _) = a
@@ -325,15 +325,15 @@ pullLever gameState sequence leverIndex correctSequence = do
 
 useLever :: GameState -> String -> IO()
 useLever gameState item = do
+  let redLeverNames = ["czerwona", "czerwoną", "czerwonej"]
+  let blueLeverNames = ["niebieska", "niebieską", "niebieskiej"]
+  let greenLeverNames = ["zielona", "zieloną", "zielonej"]
+
   if getRoomId gameState == 2 then do
-    case item of
-      "czerwona" -> pullLever gameState (getSequence gameState) 0 [0, 1, 0]
-      "czerwoną" -> pullLever gameState (getSequence gameState) 0 [0, 1, 0]
-      "niebieska" -> pullLever gameState (getSequence gameState) 1 [0, 0, 0]
-      "niebieską" -> pullLever gameState (getSequence gameState) 1 [0, 0, 0]
-      "zielona" -> pullLever gameState (getSequence gameState) 2 [1, 1, 0]
-      "zieloną" -> pullLever gameState (getSequence gameState) 2 [1, 1, 0]
-      _ -> incorrectUsage gameState item ""
+    if isOnList item redLeverNames then pullLever gameState (getSequence gameState) 0 [0, 1, 0]
+    else if isOnList item blueLeverNames then pullLever gameState (getSequence gameState) 1 [0, 0, 0]
+    else if isOnList item greenLeverNames then pullLever gameState (getSequence gameState) 2 [1, 1, 0]
+    else incorrectUsage gameState item ""
   else incorrectUsage gameState item ""
 
 craft :: GameState -> String -> String -> IO()

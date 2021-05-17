@@ -13,7 +13,7 @@ initialRoomsStates :: [[String]]
 initialRoomsStates = [["klucz"], ["notatka", "list"], ["kartka"], ["drut", "blaszka"], ["piła", "siekiera", "manekin"]]
 
 initialGameState :: GameState
-initialGameState = (0, [], initialRoomsStates, [0, 2, 1, 0, 0], [0, 0, 0])
+initialGameState = (0, [], initialRoomsStates, [0, 2, 2, 0, 0], [0, 0, 0])
 
 getRoomId :: GameState -> Int
 getRoomId (a, _, _, _, _) = a
@@ -281,9 +281,12 @@ use :: GameState -> String -> IO()
 use gameState item = do
   if getRoomId gameState == 2 then do
     case item of
-      "czerwona-dźwignia" -> useLever gameState (getSequence gameState) 0 [0, 1, 0]
-      "niebieska-dźwignia" -> useLever gameState (getSequence gameState) 1 [0, 0, 0]
-      "zielona-dźwignia" -> useLever gameState (getSequence gameState) 2 [1, 1, 0]
+      "czerwona" -> useLever gameState (getSequence gameState) 0 [0, 1, 0]
+      "czerwoną" -> useLever gameState (getSequence gameState) 0 [0, 1, 0]
+      "niebieska" -> useLever gameState (getSequence gameState) 1 [0, 0, 0]
+      "niebieską" -> useLever gameState (getSequence gameState) 1 [0, 0, 0]
+      "zielona" -> useLever gameState (getSequence gameState) 2 [1, 1, 0]
+      "zieloną" -> useLever gameState (getSequence gameState) 2 [1, 1, 0]
       _ -> incorrectUsage gameState item ""
   else incorrectUsage gameState item ""
 
@@ -368,38 +371,49 @@ dropItem gameState item = do
 
 command :: [String] -> GameState -> IO ()
 command line gameState = do
-  if length line > 3 then wrongCommand gameState
-  else do
-    case head line of
-      "upuszczam" -> if length line == 2
-        then dropItem gameState (line !! 1)
-        else wrongCommand gameState
-      "rozglądam" -> if length line == 1 || (length line == 2 && (line !! 1) == "się")
-        then lookAround gameState
-        else wrongCommand gameState
-      "podnoszę" -> if length line == 2
-        then pickUp gameState (line !! 1)
-        else wrongCommand gameState
-      "czytam" -> if length line == 2
-        then readNote gameState (line !! 1)
-        else wrongCommand gameState
-      "używam" -> if length line == 2
-        then use gameState (line !! 1)
-        else if length line == 3
-          then use2Items gameState (line !! 1) (line !! 2)
-          else wrongCommand gameState
-      "łączę" -> if length line == 3
-        then craft gameState (line !! 1) (line !! 2)
-        else wrongCommand gameState
-      "przeglądam" -> if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek")
-        then showInventory gameState
-        else wrongCommand gameState
-      "wpisuję" -> if length line == 3 && (line !! 1) == "kod"
-        then enterCode gameState (line !! 2)
-        else wrongCommand gameState
-      "pomocy" -> help gameState
-      "koniec" -> exitSuccess
-      _ -> do wrongCommand gameState
+  let dropItemNames = ["upuszczam", "upuść", "upusc"]
+  let lookAroundNames = ["rozglądam", "rozgladam", "rozejrzyj"]
+  let pickUpNames = ["podnoszę", "podnosze", "podnieś", "podnies"]
+  let readNoteNames = ["czytam", "przeczytaj", "czytaj"]
+  let useNames = ["używam", "uzywam", "użyj", "uzyj"]
+  let leverNames = ["dźwignię", "dźwignie", "dzwignię", "dzwignie", "dźwignia", "dzwignia", "dźwigni", "dzwigni"]
+  let craftNames = ["łączę", "łącze", "łaczę", "łacze", "lączę", "lącze", "laczę", "lacze", "połącz", "połacz", "polącz", "polacz"]
+  let showInventoryNames = ["przeglądam", "przegladam", "przejrzyj", "obejrzyj", "zobacz"]
+  let enterCodeNames = ["wpisuję", "wpisuje", "wpisz"]
+  let helpNames = ["pomocy", "pomoc", "help"]
+  let exitNames = ["koniec", "exit", "wyjście", "wyjscie", "wyjdź"]
+
+  if length line > 3 then do wrongCommand gameState
+  else if isOnList (head line) dropItemNames then do
+     if length line == 2 then dropItem gameState (line !! 1)
+     else wrongCommand gameState
+  else if isOnList (head line) lookAroundNames then do
+    if length line == 1 || (length line == 2 && ((line !! 1) == "się" || (line !! 1) == "sie")) then lookAround gameState
+    else wrongCommand gameState
+  else if isOnList (head line) pickUpNames then do
+    if length line == 2 then pickUp gameState (line !! 1)
+    else wrongCommand gameState
+  else if isOnList (head line) readNoteNames then do
+    if length line == 2 then readNote gameState (line !! 1)
+    else wrongCommand gameState
+  else if isOnList (head line) useNames then do
+    if isOnList (line !! 1) leverNames
+    then use gameState (line !! 2)
+    else if length line == 3
+         then use2Items gameState (line !! 1) (line !! 2)
+         else wrongCommand gameState
+  else if isOnList (head line) craftNames then do
+    if length line == 3 then craft gameState (line !! 1) (line !! 2)
+    else wrongCommand gameState
+  else if isOnList (head line) showInventoryNames then do
+    if length line == 1 || (length line == 2 && (line !! 1) == "ekwipunek") then showInventory gameState
+    else wrongCommand gameState
+  else if isOnList (head line) enterCodeNames then do
+    if length line == 3 && (line !! 1) == "kod" then enterCode gameState (line !! 2)
+    else wrongCommand gameState
+  else if isOnList (head line) helpNames then do help gameState
+  else if isOnList (head line) exitNames then do exitSuccess
+  else do wrongCommand gameState
 
 gameOver :: GameState -> Bool
 gameOver gameState = getRoomId gameState == length (getRoomsStates gameState)

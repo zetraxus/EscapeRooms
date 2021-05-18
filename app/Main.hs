@@ -22,7 +22,7 @@ lookAround0 gameState = do
   let msg1 = "Ocknąłeś się. Leżysz na podłodze w dziwnym pomieszczeniu, które widzisz pierwszy raz w życiu.\nWstajesz \
               \i przecierasz oczy. To nie jest sen. Na ścianie przed Tobą widnieje namazany czerwoną\nsubstacją napis: \
               \\"Nie ma ratunku!\". W pokoju znajduje się jeszcze drewniany stolik oraz wielkie \nczerwone drzwi."
-      msg2 = " Podchodzisz bliżej do stołu... Leży na nim niewielki klucz."
+      msg2 = " Podchodzisz bliżej do stołu... Leży na nim niewielki klucz oraz sztabka (wyglądająca na złotą)."
   if isOnList "klucz" (getItemsInCurrentRoom gameState) then
     putStrLn $ msg1 ++ msg2
   else
@@ -53,14 +53,12 @@ lookAround2 gameState = do
   let roomItems = getItemsInCurrentRoom gameState
       msg1 = "Wchodzisz do kolejnego pokoju - droga powrotu jest zablokowana. Po Twojej lewej stronie stoi regał\
               \\npełen książek, zaś z prawej widzisz zestaw trzech kolorowych dźwigni - niebieską, zieloną i czerwoną.\
-              \\nPod regałem znajduje się sterta brudnych ubrań, a pośród nich można również zobaczyć długopis bez\
-              \\nskuwki, "
-      msg2 = "zgniecioną kartkę, "
-      msg3 = "paczkę zapałek i kilka drobnych monet."
+              \\nPod regałem znajduje się sterta brudnych ubrań"
+      msg2 = ", a pośród nich można również zobaczyć zgniecioną kartkę."
   if isOnList "kartka" roomItems then do
-    putStrLn $ msg1 ++ msg2 ++ msg3
+      putStrLn $ msg1 ++ msg2
   else do
-    putStrLn $ msg1 ++ msg3
+      putStrLn $ msg1 ++ "."
   game gameState
 
 lookAround3 :: GameState -> IO()
@@ -87,7 +85,7 @@ lookAround3 gameState = do
 lookAround4 :: GameState -> IO()
 lookAround4 gameState = do
   let roomItems = getItemsInCurrentRoom gameState
-  let msg1 = "Po odblokowaniu drzwi pędzisz do kolejnego pomieszczenia. Ponownie, tak jak i wcześniej, \ndrzwi za Tobą\
+  let msg1 = "Po odblokowaniu drzwi pędzisz do kolejnego pomieszczenia. Ponownie, tak jak i wcześniej, \ndrzwi za Tobą \
               \zatrzaskują się. W następnym pokoju na przeciwległej ścianie widzisz drzwi \noraz świecący ekran. Gdy\
               \się do niego zbliżasz, zauważasz, że jest to czytnik linii papilarnych, \ndo którego natychmiast \
               \przykładasz dłoń - niestety, na ekranie pojawia się komunikat \n\"brak dostępu\". Rozglądasz się \
@@ -95,7 +93,7 @@ lookAround4 gameState = do
               \Na stole znajdują się narzędzia stolarskie: \n"
       msg2 = "piła, "
       msg3 = "siekiera, "
-      msg4 = "młotek i różnego rodzaju pilniki. Na \
+      msg4 = "i różnego rodzaju pilniki. Na \
               \ścianach znajdują się obrazy pewnego \nmężczyzny, a w kącie wiele ukończonych i nieukończonych \
               \wynalazków. Przyglądasz się im \nuważnie i dostrzegasz fascynację wynalazcy anatomią. Być może \
               \eksperymentował nad stworzeniem \nnowej protezy lub egzoszkieletu. Po dłuższej chwili obserwujesz w \
@@ -163,7 +161,7 @@ readNote gameState item = do
               \\ndokładnie jaki jest kod. Niestety, po trzeciej próbie wpisania kodu, mechanizm zablokował się, a na\n\
               \wyświetlaczu pojawił się licznik. Po kilku dniach zorientowałem się, że licznik pokazuje liczbę dni\n\
               \do jakiegoś wydarzenia (być może do oblokowania mechanizmu). Zostały mi jeszcze 83 dni. Jeśli to czytasz\
-              \,\nchciałbym Cię poinformować, że początkowe liczby pierwsze, które wyznaczyłem do obliczenia kodu to:\
+              \,\nchciałbym Cię poinformować, że początkowe liczby pierwsze, które wyznaczyłem do obliczenia kodu to: \
               \11, 13\ni 29. Niestety, żadna z nich nie jest prawidłowa. Sprawdź inne liczby. Mam nadzieję że chociaż \
               \Tobie się to uda.\nPowodzenia!"
       game gameState
@@ -200,7 +198,7 @@ use0 gameState item roomObject = do
 
 use3 :: GameState -> String -> String -> IO()
 use3 gameState item roomObject = do
-  if item == "wytrych" && roomObject == "kłódka" then do
+  if item == "wytrych" && (roomObject == "kłódka" || roomObject == "drzwi") then do
     putStrLn "Po kilku sekundach udało Ci się otworzyć wytrychem kłódkę."
     let newInventoryState = removeFromList item (getInventory gameState)
         newGameState = (getRoomId gameState + 1, newInventoryState, getRoomsStates gameState, getCounters gameState, getSequence gameState)

@@ -5,8 +5,12 @@ import Prelude
 import GameState
 import Utils
 
+--Pozwala na użycie polskich znaków.
 {-# LANGUAGE FlexibleInstances #-}
 
+--Funkcja wywoluje odpowiednią funkcję zależną od pokoju, w którym znajduje się gracz.
+--Odpowiednie funkcje wypisują historie związane z danym pomieszczeniem. Opis jest zależny od przedmiotów aktualnie znajdujących się w pokoju (getItemsInCurrentRoom gameState).
+--Parametry wejściowe: stan gry
 lookAround :: GameState -> IO()
 lookAround gameState = do
   case getRoomId gameState of
@@ -17,6 +21,8 @@ lookAround gameState = do
     4 -> lookAround4 gameState
     _ -> lookAroundFinal gameState 
 
+--Funkcja wypisująca opis pierwszego pokoju
+--Parametry wejściowe: stan gry
 lookAround0 :: GameState -> IO()
 lookAround0 gameState = do
   let msg1 = "Ocknąłeś się. Leżysz na podłodze w dziwnym pomieszczeniu, które widzisz pierwszy raz w życiu.\nWstajesz \
@@ -29,6 +35,8 @@ lookAround0 gameState = do
     putStrLn msg1
   game gameState
 
+--Funkcja wypisująca opis drugiego pokoju
+--Parametry wejściowe: stan gry
 lookAround1 :: GameState -> IO()
 lookAround1 gameState = do
   let roomItems = getItemsInCurrentRoom gameState
@@ -48,6 +56,8 @@ lookAround1 gameState = do
     putStrLn $ msg1 ++ msg4
   game gameState
 
+--Funkcja wypisująca opis trzeciego pokoju
+--Parametry wejściowe: stan gry
 lookAround2 :: GameState -> IO()
 lookAround2 gameState = do
   let roomItems = getItemsInCurrentRoom gameState
@@ -61,6 +71,8 @@ lookAround2 gameState = do
       putStrLn $ msg1 ++ "."
   game gameState
 
+--Funkcja wypisująca opis czwartego pokoju
+--Parametry wejściowe: stan gry
 lookAround3 :: GameState -> IO()
 lookAround3 gameState = do
   let roomItems = getItemsInCurrentRoom gameState
@@ -82,6 +94,8 @@ lookAround3 gameState = do
     putStrLn $ msg1 ++ msg4
   game gameState
 
+--Funkcja wypisująca opis piątego pokoju
+--Parametry wejściowe: stan gry
 lookAround4 :: GameState -> IO()
 lookAround4 gameState = do
   let roomItems = getItemsInCurrentRoom gameState
@@ -120,6 +134,8 @@ lookAround4 gameState = do
     putStrLn $ msg1 ++ msg4 ++ msg6
   game gameState
 
+--Funkcja wypisuje końcową historię po przejściu wszystkich pokoi
+--Parametry wejściowe: stan gry
 lookAroundFinal :: GameState -> IO()
 lookAroundFinal gameState = do
   let finalMsg = "Udało Ci się! Wreszcie wyszedłeś na wolność. "
@@ -127,7 +143,11 @@ lookAroundFinal gameState = do
     putStrLn $ finalMsg ++ "Udało Ci się zachować swoją sztabkę złota. Jesteś bogaty, gratulacje!"
   else
     putStrLn finalMsg
-    
+
+--Funkcja pozwalająca na podniesienie przedmiotu znajdującego się w pokoju.
+--Po podniesieniu przedmiot jest umieszczeny w inventory gracza i usuwany z listy przedmiotów znajdujących się w pokoju.
+--Przedmiot można podnieść tylko gdy mamy miejsce w plecaku.
+--Parametry wejściowe: stan gry, podnoszony przedmiot z otoczenia
 pickUp :: GameState -> String -> IO()
 pickUp gameState item = do
   if isOnList item (getInventory gameState) then do
@@ -152,6 +172,8 @@ pickUp gameState item = do
     putStrLn $ "Nie możesz podnieść przedmiotu " ++ item ++ "."
     game gameState
 
+--Funkcja pozwalająca na przeczytanie tekstu z przedmiotu typu notatka itp.
+--Parametry wejściowe: stan gry, przedmiot z ekwipunku do przeczytania
 readNote :: GameState -> String -> IO()
 readNote gameState item = do
   if isOnList item (getInventory gameState) then do
@@ -179,7 +201,9 @@ readNote gameState item = do
   else do
     putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item ++ "."
     game gameState
-    
+
+--Funkcja wypisująca nieprawidłowe użycie przedmiotu.
+--Parametry wejściowe: stan gry, przedmiot z ekwipunku i opcjonalnie przedmiot z otoczenia.
 incorrectUsage :: GameState -> String -> String -> IO()
 incorrectUsage gameState item roomObject = do
   if roomObject /= "" then
@@ -188,6 +212,8 @@ incorrectUsage gameState item roomObject = do
     putStrLn $ "Nie można użyć przedmiotu " ++ item ++ "."
   game gameState
 
+--Funkcja pozwalająca na użycie przedmiotu z ekwipunku z przedmiotem z otoczenia w 1 pokoju.
+--Parametry wejściowe: stan gry, przedmiot z ekwipunku, przedmiot z otoczenia.
 use0 :: GameState -> String -> String -> IO()
 use0 gameState item roomObject = do
   if item == "klucz" && roomObject == "drzwi" then do
@@ -196,6 +222,8 @@ use0 gameState item roomObject = do
     lookAround newGameState
     else incorrectUsage gameState item roomObject
 
+--Funkcja pozwalająca na użycie przedmiotu z ekwipunku z przedmiotem z otoczenia w 4 pokoju.
+--Parametry wejściowe: stan gry, przedmiot z ekwipunku, przedmiot z otoczenia.
 use3 :: GameState -> String -> String -> IO()
 use3 gameState item roomObject = do
   if item == "wytrych" && (roomObject == "kłódka" || roomObject == "drzwi") then do
@@ -205,6 +233,8 @@ use3 gameState item roomObject = do
     lookAround newGameState
   else incorrectUsage gameState item roomObject
 
+--Funkcja pozwalająca na użycie przedmiotu z ekwipunku z przedmiotem z otoczenia w 5 pokoju.
+--Parametry wejściowe: stan gry, przedmiot z ekwipunku, przedmiot z otoczenia.
 use4 :: GameState -> String -> String -> IO()
 use4 gameState item roomObject = do
   let roomId = getRoomId gameState
@@ -224,6 +254,8 @@ use4 gameState item roomObject = do
   else do
     incorrectUsage gameState item roomObject
 
+--Funkcja wywołująca funkcję pozwalająca na użycie przedmiotu z ekwipunku z przedmiotem z otoczenia w danym pokoju.
+--Parametry wejściowe: stan gry, przedmiot z ekwipunku, przedmiot z otoczenia.
 use2Items :: GameState -> String -> String -> IO()
 use2Items gameState item roomObject = do
   if isOnList item (getInventory gameState) then do
@@ -236,6 +268,8 @@ use2Items gameState item roomObject = do
     putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item ++ "."
     game gameState
 
+--Funkcja weryfikująca poprawność sekwencji użycia dźwigni.
+--Parametry wejściowe: stan gry, sekwencja, indeks dźwigni, prawidłowa sekwencja.
 pullLever :: GameState -> [Int] -> Int -> [Int] -> IO()
 pullLever gameState sequence leverIndex correctSequence = do
   if sequence !! leverIndex > 0 then do
@@ -265,6 +299,8 @@ pullLever gameState sequence leverIndex correctSequence = do
                   \Możesz spróbować ponownie."
           game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, newCounters, [0, 0, 0])
 
+--Funkcja pozwalająca na użycie dźwigni.
+--Parametry wejściowe: stan gry, rodzaj dźwigni.
 useLever :: GameState -> String -> IO()
 useLever gameState item = do
   let redLeverNames = ["czerwona", "czerwoną", "czerwonej"]
@@ -278,6 +314,8 @@ useLever gameState item = do
     else incorrectUsage gameState item ""
   else incorrectUsage gameState item ""
 
+--Funkcja pozwalająca na łącznie dwóch przedmiotów z ekwipunku w jeden.
+--Parametry wejściowe: stan gry, pierwszy przedmiot z ekwipunku, drugi przedmiot z ekwipunku.
 craft :: GameState -> String -> String -> IO()
 craft gameState item1 item2 = do
   let inventoryState = getInventory gameState
@@ -296,11 +334,15 @@ craft gameState item1 item2 = do
     putStrLn $ "Nie posiadasz w swoim ekwipunku przedmiotu " ++ item1 ++ " lub " ++ item2 ++ "."
     game gameState
 
+--Funkcja pozwalająca na wypisanie stanu inventory gracza.
+--Parametry wejściowe: stan gry.
 showInventory :: GameState -> IO()
 showInventory gameState = do
   print $ getInventory gameState
   game gameState
 
+--Funkcja pozwalająca na wpisanie kodu np. do drzwi z weryfikacją liczby prób.
+--Parametry wejściowe: stan gry, testowany kod.
 enterCode :: GameState -> String -> IO()
 enterCode gameState code = do
   let roomId = getRoomId gameState
@@ -316,12 +358,17 @@ enterCode gameState code = do
     putStrLn "bzzz: ZŁY KOD"
     game (getRoomId gameState, getInventory gameState, getRoomsStates gameState, newCounters, getSequence gameState)
     
+--Funkcja zwiększająca stan danego licznika (używanego przy wprowadzaniu kodu).
+--Parametry wejściowe: wartość, numer pokoju, lista liczników.
+--Parametry wyjściowe: nowe wartości liczników.
 incrementCounter :: Int -> Int -> [Int] -> [Int]
 incrementCounter value roomId counters = do
   let counterValue = counters !! roomId
       newValue = counterValue + value
-  replaceNthElement roomId newValue counters --update counters
+  replaceNthElement roomId newValue counters
 
+--Funkcja wypisująca pomoc.
+--Parametry wejściowe: stan gry.
 help :: GameState -> IO()
 help gameState = do
   putStrLn "============== \n\
@@ -339,12 +386,16 @@ help gameState = do
             \- koniec \n\
             \=============="
   game gameState
-
+  
+--Funkcja pokazująca, że komenda jest błeda.
+--Parametry wejściowe: stan gry.
 wrongCommand :: GameState -> IO()
 wrongCommand gameState = do
   putStrLn "Błędna komenda! Spróbuj jeszcze raz."
   help gameState
 
+--Funkcja pozwalająca na upuszczenie przedmiotu z ekwipunku.
+--Parametry wejściowe: stan gry, przedmiot z ekwipunku.
 dropItem :: GameState -> String -> IO()
 dropItem gameState item = do
   if isOnList item (getInventory gameState) then do
@@ -357,6 +408,9 @@ dropItem gameState item = do
     putStrLn "Nie masz przedmiotu o takiej nazwie w swoim ekwipunku."
     game gameState
 
+--Funkcja pozwalająca na wykonywanie komend.
+--Funkcja umożliwia wpisananie przez gracza różnych wariantów komend, w tym na użycie polskich znaków.
+--Parametry wejściowe: input gracza, stan gry.
 command :: [String] -> GameState -> IO ()
 command line gameState = do
   let dropItemNames = ["upuszczam", "upuść", "upusc"]
@@ -403,6 +457,8 @@ command line gameState = do
   else if isOnList (head line) exitNames then do exitSuccess
   else do wrongCommand gameState
 
+--Funkcja zawierająca główną pętlę gry.
+--Parametry wejściowe: stan gry.
 game :: GameState -> IO()
 game gameState = do
     if gameOver gameState then putStrLn "Koniec gry!"
@@ -410,5 +466,6 @@ game gameState = do
       line <- getInputLine "Co teraz robisz?";
       command (words line) gameState
 
+--Start gry.
 main :: IO ()
 main = lookAround initialGameState
